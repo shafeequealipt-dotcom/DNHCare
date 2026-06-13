@@ -10,7 +10,6 @@ Bengaluru). Keep each post original, locally useful, and tied to a service page.
 - If the queue runs low (< 5 left), add 10 fresh, non-duplicate ideas before writing.
 
 ## Queue (oldest first = next up)
-- [Allergies] Sinus headaches vs migraines: telling them apart
 - [Women] PCOS and irregular cycles: what a first consultation looks at
 - [Migraine] Screen time, posture and the office headache
 - [Skin] Hair fall in Bengaluru's water: separating myth from cause
@@ -25,6 +24,7 @@ Bengaluru). Keep each post original, locally useful, and tied to a service page.
 - [Skin] Urticaria (hives): why it flares and how care approaches it
 
 ## Done (most recent first)
+- 2026-06-13 [Allergies] Sinus headaches vs migraines: telling them apart  -> sinus-headache-vs-migraine-varthur.html
 - 2026-06-14 [Children] Building a toddler's appetite without the mealtime battles  -> toddler-appetite-tips-varthur.html
 - 2026-06-14 [Skin] Acne in your 20s and 30s: why it isn't just a teenage problem  -> acne-20s-30s-not-just-teenage.html
 - 2026-06-14 [Skin] Why eczema flares in Bengaluru's dry months  -> eczema-and-bengaluru-weather.html
