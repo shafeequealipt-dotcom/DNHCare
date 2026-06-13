@@ -59,10 +59,16 @@ OR:  cd to folder, `python -m http.server 8347`, open http://localhost:8347
 - REPO = https://github.com/shafeequealipt-dotcom/DNHCare
 - account = shafeequealipt-dotcom (gh already logged in)
 - branch = main
+- DEPLOY = GitHub Pages. CNAME file = dnhcare.co.in  (Pages serves at the REAL domain).
+  -> KEEP the CNAME file. never delete. if rebase needed, preserve it.
+  -> Pages serves files at real path: /skin-treatment.html (NOT /skin-treatment).
+  -> so all canonical/og/sitemap URLs use .html to match (no 404 canonicals). home = "/".
+  -> NOTE: was the old Framer site live at dnhcare.co.in. DNS may or may not point to Pages yet.
 PUSH PENDING CHANGES =
     git add -A
     git commit -m "your message"
     git push
+(if remote rejects: `git fetch origin` then `git rebase origin/main` (keeps CNAME), then push.)
 (if push asks auth, gh handles it. https protocol.)
 
 ## SEO STATE  (DONE = on the site already)

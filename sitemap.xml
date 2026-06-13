@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://dnhcare.co.in/</loc><priority>1.0</priority></url>
-  <url><loc>https://dnhcare.co.in/skin-treatment</loc><priority>0.8</priority></url>
-  <url><loc>https://dnhcare.co.in/allergy-treatment</loc><priority>0.8</priority></url>
-  <url><loc>https://dnhcare.co.in/pediatric-care</loc><priority>0.8</priority></url>
-  <url><loc>https://dnhcare.co.in/migraine-treatment</loc><priority>0.8</priority></url>
-  <url><loc>https://dnhcare.co.in/womens-health</loc><priority>0.8</priority></url>
+  <url><loc>https://dnhcare.co.in/skin-treatment.html</loc><priority>0.8</priority></url>
+  <url><loc>https://dnhcare.co.in/allergy-treatment.html</loc><priority>0.8</priority></url>
+  <url><loc>https://dnhcare.co.in/pediatric-care.html</loc><priority>0.8</priority></url>
+  <url><loc>https://dnhcare.co.in/migraine-treatment.html</loc><priority>0.8</priority></url>
+  <url><loc>https://dnhcare.co.in/womens-health.html</loc><priority>0.8</priority></url>
 </urlset>
