@@ -5,6 +5,18 @@ READ THIS FILE ALONE = KNOW EVERYTHING. PUSH TO GITHUB. DONE.
 
 ---
 
+## STATUS (2026-06-14) — LIVE
+- SITE IS LIVE at dnhcare.co.in. main == development. full v2 site + blog + 5 posts + SEO all deployed.
+- BACKUP of old main = branch `backup-main-20260614` (commit df23bf7). rollback = `git push -f origin backup-main-20260614:main`.
+- LOCAL BOT is running (this machine), PUBLISH_BRANCH=main -> Approve publishes LIVE. token via `gh auth token`.
+  launcher = C:\Projects\3DWebsites\run_bot.ps1 (kills old + relaunches). restart from bash:
+  `export GITHUB_TOKEN=$(gh auth token); powershell.exe -File C:\Projects\3DWebsites\run_bot.ps1 > log 2>&1` (run_in_background).
+- ORACLE DEPLOY = STILL PENDING (cannot do from here — no VM access). user runs agent/bot/SETUP-ORACLE.md on the VM.
+  on Oracle: set DNH_Telegram_Token, DNH_Telegram_ID, OPENROUTER_API_KEY, DNH_Github_Token (a PAT, not gh) as env;
+  PUBLISH_BRANCH defaults to main. RUN ONLY ONE BOT AT A TIME (same Telegram token -> 409 conflict): stop local before starting Oracle.
+
+---
+
 ## WHAT THIS IS
 3D SCROLL WEBSITE. CLINIC. HOMEOPATHY. BENGALURU.
 real clinic site = dnhcare.co.in (old Framer site).
