@@ -11,9 +11,15 @@ READ THIS FILE ALONE = KNOW EVERYTHING. PUSH TO GITHUB. DONE.
 - LOCAL BOT is running (this machine), PUBLISH_BRANCH=main -> Approve publishes LIVE. token via `gh auth token`.
   launcher = C:\Projects\3DWebsites\run_bot.ps1 (kills old + relaunches). restart from bash:
   `export GITHUB_TOKEN=$(gh auth token); powershell.exe -File C:\Projects\3DWebsites\run_bot.ps1 > log 2>&1` (run_in_background).
-- ORACLE DEPLOY = STILL PENDING (cannot do from here — no VM access). user runs agent/bot/SETUP-ORACLE.md on the VM.
-  on Oracle: set DNH_Telegram_Token, DNH_Telegram_ID, OPENROUTER_API_KEY, DNH_Github_Token (a PAT, not gh) as env;
-  PUBLISH_BRANCH defaults to main. RUN ONLY ONE BOT AT A TIME (same Telegram token -> 409 conflict): stop local before starting Oracle.
+- ORACLE DEPLOY = DONE (2026-06-14). bot runs 24/7 on the Oracle VM as a systemd service.
+    host = ubuntu@140.245.230.251 (Ubuntu 22.04). ssh key (local) = ~/.ssh/oracle.key (copy of C:\Projects\Orcale\ssh-key-2026-05-25 (1).key).
+    deploy dir = /home/ubuntu/DNHCare ; venv = /home/ubuntu/dnhvenv ; secrets = /home/ubuntu/DNHCare/agent/bot/.env (chmod 600).
+    service = dnhcare-bot (systemd, enabled=survives reboot). manage: `sudo systemctl {status|restart|stop} dnhcare-bot` ; logs `journalctl -u dnhcare-bot -f`.
+    config: PUBLISH_BRANCH=main, POST_TIME=06:00 IST, model=openai/gpt-oss-120b:free, token=DNH_Github_Token (fine-grained PAT, Contents:R/W).
+    to pull new code onto the VM: `ssh ... 'cd ~/DNHCare && git pull && sudo systemctl restart dnhcare-bot'`.
+- LOCAL bot = STOPPED (Oracle is the only instance now). RUN ONLY ONE BOT (same Telegram token -> 409). don't restart local while Oracle runs.
+- GOTCHA hit during deploy: fine-grained PAT needs **Contents: Read AND write** + the repo selected under "Only select repositories"
+  (public-read-only access = push denied 403). API /user can be valid while git push 403s if Contents:write is missing.
 
 ---
 
