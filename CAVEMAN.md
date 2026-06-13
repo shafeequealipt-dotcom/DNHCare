@@ -64,11 +64,19 @@ OR:  cd to folder, `python -m http.server 8347`, open http://localhost:8347
   -> Pages serves files at real path: /skin-treatment.html (NOT /skin-treatment).
   -> so all canonical/og/sitemap URLs use .html to match (no 404 canonicals). home = "/".
   -> NOTE: was the old Framer site live at dnhcare.co.in. DNS may or may not point to Pages yet.
-PUSH PENDING CHANGES =
+- BRANCHES:
+    main        = LIVE. deploys to dnhcare.co.in. only touch via approved merge.
+    development = WORK HERE. push freely, does NOT deploy. (current default branch for changes.)
+- MERGE FLOW (user chose: PR + review each time):
+    do work on development -> commit -> push origin development
+    when user says "ship"/"approve": open PR development->main with `gh pr create --base main --head development`
+    user reviews + merges on GitHub -> main rebuilds -> domain live in ~1-2 min.
+    NEVER push straight to main without user approval.
+PUSH PENDING CHANGES (on development) =
     git add -A
     git commit -m "your message"
-    git push
-(if remote rejects: `git fetch origin` then `git rebase origin/main` (keeps CNAME), then push.)
+    git push                       # pushes to origin/development (upstream set)
+(if remote rejects: `git fetch origin` then `git rebase origin/<branch>` (keeps CNAME), then push.)
 (if push asks auth, gh handles it. https protocol.)
 
 ## SEO STATE  (DONE = on the site already)
