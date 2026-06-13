@@ -58,21 +58,31 @@ trick = canvas image-sequence scrub.
 - GOAL = 1 new post/day INTO /blog/, DRAFT only -> sent to Telegram with Approve/Reject ->
   on Approve the bot commits to main -> GitHub Pages auto-deploys. Approval happens IN TELEGRAM.
 - ARCHITECTURE = standing Python service on the user's Oracle Cloud VM (systemd), long-polling Telegram.
+- LLM PROVIDER = **OpenRouter** (OpenAI-compatible), NOT Anthropic. Free models by default.
+  Model is RUNTIME-SWITCHABLE from Telegram (/model /models /setmodel), persisted in agent/bot/state.json (gitignored).
+  Default = qwen/qwen3-next-80b-a3b-instruct:free; presets incl. llama-3.3-70b, gpt-oss-120b, gemma-4, nemotron (all :free).
+  NOTE: OpenRouter's free roster changes — if a model 404s "unavailable for free", pick another via /models or /setmodel.
+  Free models get rate-limited (429) upstream; llm.chat retries 4x; user can switch model if one is flaky.
 - CODE = /agent/bot/  (a Python package):
-    config.py    = loads agent/bot/.env; brand constants; category->service-page map.
-    topics.py    = read/add/consume agent/topics.md; autoselect_viral_topic() uses Claude + web_search.
-    content.py   = Claude (claude-opus-4-8, messages.parse -> Pydantic Post) writes structured content;
-                   Python assembles the post HTML deterministically (schema/disclaimer/author/canonical/CTA always present).
+    config.py    = Telegram creds from SYSTEM env (DNH_Telegram_Token / DNH_Telegram_ID); OpenRouter key + base url;
+                   PRESET_MODELS; get_model()/set_model() persist to state.json; brand constants; category->service map.
+    llm.py       = shared OpenRouter client + chat() with 429 retry.
+    topics.py    = read/add/consume agent/topics.md; autoselect_viral_topic() = date-aware OpenRouter call (no web tool).
+    content.py   = OpenRouter (current model) returns JSON -> robust parse -> Pydantic Post; Python assembles the post
+                   HTML deterministically (schema/disclaimer/author/canonical/CTA always present).
     publisher.py = sync main, stage draft, run gate, on approve: insert blog index card + sitemap loc + mark topic done + git commit/push main.
-    bot.py       = telegram bot: JobQueue daily at POST_TIME (IST); /generate /topics /addtopic; Approve/Reject buttons; Reject->reply feedback->regenerate.
+    bot.py       = telegram bot: JobQueue daily at POST_TIME (IST); /generate /topics /addtopic /model /models /setmodel;
+                   Approve/Reject buttons; Reject->reply feedback->regenerate.
     check_post.py (in /agent/) = the deterministic gate, run on every draft before it's shown.
     deploy/dnhcare-bot.service + SETUP-ORACLE.md = systemd unit + full Oracle deploy guide.
-- SECRETS (user provides in agent/bot/.env on the VM): TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID,
-  ANTHROPIC_API_KEY, GITHUB_TOKEN (fine-grained PAT, Contents:RW on DNHCare), REPO_DIR, POST_TIME.
+- SECRETS:
+    Telegram = SYSTEM env vars DNH_Telegram_Token + DNH_Telegram_ID (already set on user's Windows machine; export on the VM).
+    OPENROUTER_API_KEY = system env (already set) or .env.
+    in agent/bot/.env: GITHUB_TOKEN (fine-grained PAT, Contents:RW on DNHCare), REPO_DIR, POST_TIME, optional DEFAULT_MODEL.
 - IMPORTANT = the bot's working clone (REPO_DIR) must be on **main** and must contain blog/ + agent/ + agent/bot/.
   So MERGE development->main before deploying (blog + agent + bot all land on main together).
-- TESTED locally: modules compile, template passes the gate (806 words), JSON-LD valid, topics parser works.
-  NOT yet run live (needs the user's Telegram/Anthropic/GitHub secrets on the Oracle VM).
+- TESTED locally: modules compile; live OpenRouter free-model generation produced a valid post that PASSED the gate
+  (627 words); model set/get persistence works; JSON-LD valid. NOT yet run live on the VM (needs GitHub PAT + VM).
 
 ## FILES (the whole site)
 - index.html ............ homepage. 2 scrub sections (#hero, #philosophy) + about/services/stories/faq/visit.

@@ -8,13 +8,18 @@ publishes it to dnhcare.co.in. Approve/Reject and topic management all happen in
 > contain the `blog/`, `agent/topics.md`, `agent/check_post.py`, and `agent/bot/` files.
 > So merge `development → main` first (the blog + agent + bot all land on main together).
 
-## 0. One-time: collect the four secrets
-- **Telegram bot token** — message **@BotFather** → `/newbot` → copy the token.
-- **Telegram chat id** — message **@userinfobot** → copy your numeric `Id`.
-  (Then message your new bot once so it's allowed to DM you.)
-- **Anthropic API key** — console.anthropic.com → API keys.
+## 0. One-time: the secrets
+The bot reads **Telegram** creds from system env vars `DNH_Telegram_Token` and
+`DNH_Telegram_ID` (already set on the user's Windows machine). Content generation uses
+**OpenRouter** (`OPENROUTER_API_KEY`). You still need a **GitHub PAT** for publishing.
 - **GitHub PAT** — github.com → Settings → Developer settings → *Fine-grained tokens* →
   repo access = `shafeequealipt-dotcom/DNHCare`, permission **Contents: Read and write**.
+- On the Oracle VM, export the three system secrets (or add them to `.env`):
+  ```bash
+  export DNH_Telegram_Token=...      # bot token
+  export DNH_Telegram_ID=...         # numeric chat id
+  export OPENROUTER_API_KEY=sk-or-...
+  ```
 
 ## 1. Provision the VM
 Oracle Cloud → Compute → Instance. The **Always Free** `VM.Standard.A1.Flex`
@@ -37,7 +42,8 @@ python3 -m venv /opt/dnhcare/venv
 ## 3. Configure
 ```bash
 cp agent/bot/.env.example agent/bot/.env
-nano agent/bot/.env     # paste the four secrets; set POST_TIME (IST), REPO_DIR=/opt/dnhcare/DNHCare
+nano agent/bot/.env     # GITHUB_TOKEN, REPO_DIR=/opt/dnhcare/DNHCare, POST_TIME (IST),
+                        # OPENROUTER_API_KEY (if not exported), DEFAULT_MODEL
 ```
 Let git commit as the bot (used for the publish commits):
 ```bash
@@ -70,11 +76,14 @@ journalctl -u dnhcare-bot -f               # live logs
 - `/generate` — draft right now.
 - `/topics` — see the queue.
 - `/addtopic [Skin] Why winter worsens eczema` — queue a topic.
-- When the queue runs low it auto-picks a trending, healthcare-relevant topic (web-aware).
+- `/model` shows the current writing model; `/models` picks from free presets; `/setmodel <id>`
+  sets any OpenRouter model. Changes take effect immediately and persist across restarts.
+- When the queue runs low it auto-picks a timely, healthcare-relevant topic.
 
 ## Notes
 - The agent only ever **commits on approval** — nothing is published without your tap.
 - Every draft must pass `agent/check_post.py` (no medical overclaims, disclaimer + author +
   schema present, ≥380 words) before it's even shown to you.
 - To change the daily time: edit `POST_TIME` in `.env`, then `sudo systemctl restart dnhcare-bot`.
-- Cost: ~one Claude Opus 4.8 call per post (a few cents) + web search on auto-topic days.
+- Cost: content is generated via OpenRouter free models by default (qwen etc.), so ~free;
+  switch to a paid OpenRouter model anytime with `/setmodel`.

@@ -104,9 +104,45 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "Commands:\n"
         "/generate – write a draft now\n"
         "/topics – show the topic queue\n"
-        "/addtopic <topic> – add a topic to the queue\n\n"
+        "/addtopic <topic> – add a topic to the queue\n"
+        "/model – show the current writing model\n"
+        "/models – pick a model from the free presets\n"
+        "/setmodel <id> – set any OpenRouter model id\n\n"
         "On each draft: ✅ Approve publishes it live; ✏️ Reject lets you reply with "
         "changes and I'll rewrite.")
+
+
+async def cmd_model(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not _only_owner(update):
+        return
+    await update.message.reply_text(f"Current writing model:\n<code>{config.get_model()}</code>",
+                                    parse_mode=ParseMode.HTML)
+
+
+async def cmd_models(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not _only_owner(update):
+        return
+    cur = config.get_model()
+    rows = []
+    for i, m in enumerate(config.PRESET_MODELS):
+        label = ("✅ " if m == cur else "") + m
+        rows.append([InlineKeyboardButton(label, callback_data=f"m:{i}")])
+    await update.message.reply_text(
+        "Pick a writing model (free presets) — or use /setmodel <id> for any other:",
+        reply_markup=InlineKeyboardMarkup(rows))
+
+
+async def cmd_setmodel(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not _only_owner(update):
+        return
+    mid = " ".join(context.args).strip()
+    if not mid:
+        await update.message.reply_text(
+            "Usage: /setmodel qwen/qwen-2.5-72b-instruct:free\nOr use /models for presets.")
+        return
+    config.set_model(mid)
+    await update.message.reply_text(f"Writing model set to:\n<code>{mid}</code>",
+                                    parse_mode=ParseMode.HTML)
 
 
 async def cmd_generate(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -141,6 +177,12 @@ async def on_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
     q = update.callback_query
     await q.answer()
     if q.message.chat.id != config.TELEGRAM_CHAT_ID:
+        return
+    if q.data.startswith("m:"):
+        idx = int(q.data[2:])
+        model = config.PRESET_MODELS[idx]
+        config.set_model(model)
+        await q.edit_message_text(f"Writing model set to:\n{model}")
         return
     if not PENDING.get("post"):
         await q.edit_message_reply_markup(reply_markup=None)
@@ -191,6 +233,9 @@ def main():
     app.add_handler(CommandHandler("generate", cmd_generate))
     app.add_handler(CommandHandler("topics", cmd_topics))
     app.add_handler(CommandHandler("addtopic", cmd_addtopic))
+    app.add_handler(CommandHandler("model", cmd_model))
+    app.add_handler(CommandHandler("models", cmd_models))
+    app.add_handler(CommandHandler("setmodel", cmd_setmodel))
     app.add_handler(CallbackQueryHandler(on_button))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, on_text))
 

@@ -2,8 +2,7 @@
 and auto-pick a viral, current, healthcare topic via Claude when the queue is low."""
 import re
 import datetime
-import anthropic
-from . import config
+from . import config, llm
 
 _QUEUE_HDR = "## Queue (oldest first = next up)"
 _DONE_HDR = "## Done (most recent first)"
@@ -72,32 +71,30 @@ def mark_done(topic: str, slug: str):
 
 
 def autoselect_viral_topic() -> str:
-    """Ask Claude (with web search) for ONE current, viral, healthcare-relevant
-    blog topic suited to a homeopathy clinic. Returns a '[Category] Title' line."""
-    client = anthropic.Anthropic(api_key=config.ANTHROPIC_API_KEY)
+    """Ask the current OpenRouter model for ONE timely, shareable, healthcare-relevant
+    blog topic suited to the clinic. Returns a '[Category] Title' line."""
     cats = " / ".join(config.CATEGORIES)
-    resp = client.messages.create(
-        model=config.CLAUDE_MODEL,
-        max_tokens=1200,
-        tools=[{"type": "web_search_20260209", "name": "web_search"}],
+    today = datetime.date.today()
+    month = today.strftime("%B")
+    resp = llm.chat(
+        temperature=0.8,
+        max_tokens=200,
         messages=[{
             "role": "user",
             "content": (
                 "You plan content for a homeopathy clinic in Varthur, Bengaluru "
                 f"(Dr. Nafia's Homoeopathic Medical Centre). Categories: {cats}.\n"
-                "Using current season, weather, and trending health concerns in "
-                "Bengaluru / India right now, propose ONE blog post topic that is "
-                "timely, highly shareable, and genuinely useful — something people "
-                "are searching for or talking about this week. It MUST map to one of "
-                "the categories and stay within safe, non-overclaiming homeopathy "
-                "content (no cure/guarantee language).\n\n"
+                f"It is {month} {today.year} in Bengaluru, India. Considering the "
+                "current season, typical weather, and health concerns common at this "
+                "time of year, propose ONE blog topic that is timely, highly "
+                "shareable, and genuinely useful. It MUST map to one of the categories "
+                "and stay within safe, non-overclaiming homeopathy content.\n\n"
                 "Reply with EXACTLY one line and nothing else, in this format:\n"
                 "[Category] Title of the post"
             ),
         }],
     )
-    text = "".join(b.text for b in resp.content if b.type == "text").strip()
-    # take the last non-empty line that looks like "[Cat] Title"
+    text = (resp.choices[0].message.content or "").strip()
     line = next((l.strip() for l in reversed(text.splitlines())
                  if re.match(r"^\[[A-Za-z]+\]\s+.+", l.strip())), None)
     if not line:

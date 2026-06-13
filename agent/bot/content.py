@@ -1,14 +1,13 @@
-"""Generate a blog post: Claude produces structured content, Python assembles the
-HTML deterministically so schema, disclaimer, author box, canonical and CTA are
-always present and the safety gate passes."""
+"""Generate a blog post: an OpenRouter model produces structured JSON content, Python
+assembles the HTML deterministically so schema, disclaimer, author box, canonical and
+CTA are always present and the safety gate passes."""
 import re
 import json
 import html
 import datetime
 from typing import List
-from pydantic import BaseModel, Field
-import anthropic
-from . import config
+from pydantic import BaseModel, Field, ValidationError
+from . import config, llm
 
 
 class Section(BaseModel):
@@ -33,6 +32,17 @@ class Post(BaseModel):
     faqs: List[FAQ]
 
 
+_SCHEMA = """{
+  "title": "string",
+  "slug": "short-lowercase-hyphenated-no-extension",
+  "meta_description": "140-158 character summary",
+  "category": "one of: Skin | Allergies | Children | Migraine | Women",
+  "read_minutes": 4,
+  "lede": "opening paragraph",
+  "sections": [{"heading": "string", "paragraphs": ["..."], "bullets": ["...optional..."]}],
+  "faqs": [{"question": "string", "answer": "string"}]
+}"""
+
 SYSTEM = f"""You are the staff writer for {config.CLINIC_NAME}, a homeopathy clinic in
 Varthur, Bengaluru (Dr. Nafia M, BHMS). Write a single blog post in plain, warm,
 trustworthy language for local families.
@@ -44,10 +54,12 @@ HARD RULES (a medical/YMYL site — violations are rejected):
 - Use measured language: "individualized", "may", "supports", "reviewed over time".
 - Be genuinely useful and ORIGINAL. Mention Varthur / Whitefield / Bengaluru context
   where natural. 600-900 words across the sections. 3-4 sections.
-- slug: short, lowercase, hyphenated, keyword-bearing, no extension.
-- category: EXACTLY one of {config.CATEGORIES}.
-- meta_description: 140-158 characters.
-- Include 2-3 FAQs relevant to the topic, with safe answers."""
+- category MUST be exactly one of: {config.CATEGORIES}.
+- meta_description: 140-158 characters. Include 2-3 FAQs with safe answers.
+
+Reply with ONE JSON object and NOTHING else — no markdown fences, no commentary.
+The JSON must match this shape exactly:
+{_SCHEMA}"""
 
 
 def _slugify(s: str) -> str:
@@ -55,27 +67,43 @@ def _slugify(s: str) -> str:
     return s[:70] or "post"
 
 
+def _extract_json(text: str) -> dict:
+    """Pull the first JSON object out of a model reply (tolerates ``` fences / prose)."""
+    t = text.strip()
+    t = re.sub(r"^```(?:json)?", "", t).strip()
+    t = re.sub(r"```$", "", t).strip()
+    start, end = t.find("{"), t.rfind("}")
+    if start == -1 or end == -1:
+        raise ValueError("no JSON object in model reply")
+    return json.loads(t[start:end + 1])
+
+
 def generate_post(topic: str, feedback: str = "") -> Post:
-    """Call Claude for structured post content. `feedback` is appended on regeneration."""
-    client = anthropic.Anthropic(api_key=config.ANTHROPIC_API_KEY)
+    """Generate structured post content via the currently-selected OpenRouter model.
+    `feedback` is appended on regeneration. Retries once on a parse/validation error."""
     ask = f"Write the post for this topic:\n{topic}\n"
     if feedback:
         ask += (f"\nThe previous draft was REJECTED by the editor. Apply this "
                 f"feedback and rewrite accordingly:\n{feedback}\n")
-    resp = client.messages.parse(
-        model=config.CLAUDE_MODEL,
-        max_tokens=4000,
-        thinking={"type": "adaptive"},
-        output_config={"effort": config.CLAUDE_EFFORT},
-        system=SYSTEM,
-        messages=[{"role": "user", "content": ask}],
-        output_format=Post,
-    )
-    post = resp.parsed_output
-    if post.category not in config.CATEGORIES:
-        post.category = config.CATEGORIES[0]
-    post.slug = _slugify(post.slug or post.title)
-    return post
+    messages = [{"role": "system", "content": SYSTEM},
+                {"role": "user", "content": ask}]
+    last_err = None
+    for attempt in range(2):
+        resp = llm.chat(messages, temperature=0.6, max_tokens=4000)
+        raw = resp.choices[0].message.content or ""
+        try:
+            post = Post(**_extract_json(raw))
+            if post.category not in config.CATEGORIES:
+                post.category = config.CATEGORIES[0]
+            post.slug = _slugify(post.slug or post.title)
+            return post
+        except (ValueError, ValidationError) as e:
+            last_err = e
+            messages.append({"role": "assistant", "content": raw[:2000]})
+            messages.append({"role": "user", "content":
+                             "That was not valid JSON for the required shape. "
+                             "Reply again with ONLY the JSON object, no fences."})
+    raise RuntimeError(f"model did not return valid post JSON: {last_err}")
 
 
 def _esc(s: str) -> str:
