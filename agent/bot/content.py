@@ -27,39 +27,56 @@ class Post(BaseModel):
     meta_description: str
     category: str
     read_minutes: int
+    focus_keyword: str = ""
+    keywords: List[str] = Field(default_factory=list)
     lede: str
     sections: List[Section]
     faqs: List[FAQ]
 
 
 _SCHEMA = """{
-  "title": "string",
-  "slug": "short-lowercase-hyphenated-no-extension",
-  "meta_description": "140-158 character summary",
+  "title": "string, <=60 chars, includes the focus keyword + a local cue (Varthur/Bengaluru)",
+  "slug": "short-lowercase-hyphenated-no-extension, contains the focus keyword",
+  "meta_description": "140-158 chars, compelling, contains the focus keyword",
   "category": "one of: Skin | Allergies | Children | Migraine | Women",
   "read_minutes": 4,
-  "lede": "opening paragraph",
-  "sections": [{"heading": "string", "paragraphs": ["..."], "bullets": ["...optional..."]}],
+  "focus_keyword": "the ONE primary search phrase this post targets",
+  "keywords": ["4-6 related / long-tail / local secondary keywords"],
+  "lede": "opening paragraph; use the focus keyword within the first sentence or two",
+  "sections": [{"heading": "descriptive keyword-aware H2", "paragraphs": ["..."], "bullets": ["...optional..."]}],
   "faqs": [{"question": "string", "answer": "string"}]
 }"""
 
-SYSTEM = f"""You are the staff writer for {config.CLINIC_NAME}, a homeopathy clinic in
-Varthur, Bengaluru (Dr. Nafia M, BHMS). Write a single blog post in plain, warm,
-trustworthy language for local families.
+# Fallback used only if agent/content_prompt.txt is missing. The live, editable prompt
+# lives in that repo file (edit on GitHub, or via Telegram /setprompt). Tokens
+# {clinic} and {categories} are substituted at runtime.
+DEFAULT_PROMPT = """You are a professional SEO content writer for {clinic}, a homeopathy
+clinic in Varthur, Bengaluru (Dr. Nafia M, BHMS). Write ONE blog post that ranks well in
+Google for what local patients search, while being genuinely useful, simple and clear.
 
-HARD RULES (a medical/YMYL site — violations are rejected):
-- NEVER use: cure, cures, guaranteed, "no side effects", "100% safe", miracle,
-  "permanent cure", "instant relief", risk-free. No promises of outcomes. Don't
-  diagnose the reader.
-- Use measured language: "individualized", "may", "supports", "reviewed over time".
-- Be genuinely useful and ORIGINAL. Mention Varthur / Whitefield / Bengaluru context
-  where natural. 600-900 words across the sections. 3-4 sections.
-- category MUST be exactly one of: {config.CATEGORIES}.
-- meta_description: 140-158 characters. Include 2-3 FAQs with safe answers.
+SEO: pick ONE focus keyword (a real local search phrase) and place it in the title, H1,
+meta description, first sentences, slug and at least one H2. Add 4-6 related/long-tail
+keywords woven in naturally (local terms: Varthur, Gunjur, Whitefield, Sarjapur Road,
+Balagere, Bengaluru). No keyword-stuffing. Descriptive keyword-aware H2s. Include 2-3 FAQs.
 
-Reply with ONE JSON object and NOTHING else — no markdown fences, no commentary.
-The JSON must match this shape exactly:
-{_SCHEMA}"""
+STYLE: professional, warm, simple and logical; short paragraphs; 600-900 words; 3-4 sections.
+
+SAFETY (YMYL): never use cure/guaranteed/"no side effects"/"100% safe"/miracle/"permanent
+cure"/"instant relief"/risk-free; no outcome promises; measured language only.
+category MUST be exactly one of: {categories}."""
+
+
+def _load_prompt() -> str:
+    """Load the live content prompt from the repo file (editable on GitHub / via
+    Telegram), falling back to DEFAULT_PROMPT. Appends the fixed JSON-shape footer."""
+    try:
+        base = open(config.PROMPT_FILE, encoding="utf-8").read().strip()
+    except OSError:
+        base = DEFAULT_PROMPT.strip()
+    base = base.replace("{clinic}", config.CLINIC_NAME).replace(
+        "{categories}", ", ".join(config.CATEGORIES))
+    return (base + "\n\nReply with ONE JSON object and NOTHING else — no markdown fences, "
+            "no commentary.\nThe JSON must match this shape exactly:\n" + _SCHEMA)
 
 
 def _slugify(s: str) -> str:
@@ -85,7 +102,7 @@ def generate_post(topic: str, feedback: str = "") -> Post:
     if feedback:
         ask += (f"\nThe previous draft was REJECTED by the editor. Apply this "
                 f"feedback and rewrite accordingly:\n{feedback}\n")
-    messages = [{"role": "system", "content": SYSTEM},
+    messages = [{"role": "system", "content": _load_prompt()},
                 {"role": "user", "content": ask}]
     last_err = None
     for attempt in range(2):
@@ -122,6 +139,13 @@ def render_html(post: Post, recent_posts: List[dict]) -> str:
     meta_json = json.dumps(post.meta_description)
     cat_json = json.dumps(post.category)
     crumb_json = json.dumps(post.title)
+    # SEO keywords: focus keyword first, then related — deduped, order-preserving
+    kw_raw = [k.strip() for k in ([post.focus_keyword] + list(post.keywords)) if k and k.strip()]
+    _seen = set()
+    kw_list = [k for k in kw_raw if not (k.lower() in _seen or _seen.add(k.lower()))]
+    keywords_str = ", ".join(kw_list)
+    keywords_json = json.dumps(keywords_str)
+    keywords_meta = _esc(keywords_str)
 
     sections_html = []
     for s in post.sections:
@@ -153,6 +177,7 @@ def render_html(post: Post, recent_posts: List[dict]) -> str:
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{title_t} | DNH Care Journal</title>
   <meta name="description" content="{meta}" />
+  <meta name="keywords" content="{keywords_meta}" />
   <link rel="canonical" href="https://dnhcare.co.in/blog/{post.slug}.html" />
   <meta property="og:type" content="article" />
   <meta property="og:url" content="https://dnhcare.co.in/blog/{post.slug}.html" />
@@ -160,7 +185,7 @@ def render_html(post: Post, recent_posts: List[dict]) -> str:
   <meta property="og:description" content="{meta}" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,500&family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../styles.css" />
+  <link rel="stylesheet" href="../styles.css?v=2" />
   <script type="application/ld+json">
   {{
     "@context": "https://schema.org",
@@ -170,6 +195,7 @@ def render_html(post: Post, recent_posts: List[dict]) -> str:
     "datePublished": "{today}",
     "dateModified": "{today}",
     "articleSection": {cat_json},
+    "keywords": {keywords_json},
     "url": "https://dnhcare.co.in/blog/{post.slug}.html",
     "mainEntityOfPage": "https://dnhcare.co.in/blog/{post.slug}.html",
     "author": {{ "@type": "Person", "name": "Dr. Nafia M", "jobTitle": "Homeopathic Physician", "alumniOf": "Vinayaka Mission University" }},

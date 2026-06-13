@@ -107,9 +107,73 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "/addtopic <topic> – add a topic to the queue\n"
         "/model – show the current writing model\n"
         "/models – pick a model from the free presets\n"
-        "/setmodel <id> – set any OpenRouter model id\n\n"
+        "/setmodel <id> – set any OpenRouter model id\n"
+        "/time – show the daily post time\n"
+        "/settime HH:MM – set the daily post time (IST)\n"
+        "/prompt – show the content-generation prompt\n"
+        "/setprompt <text> – update the prompt (also editable on GitHub)\n\n"
         "On each draft: ✅ Approve publishes it live; ✏️ Reject lets you reply with "
         "changes and I'll rewrite.")
+
+
+def _schedule_daily(job_queue):
+    """(Re)schedule the daily post job from the persisted time. Returns the time string."""
+    for j in job_queue.get_jobs_by_name("daily_post"):
+        j.schedule_removal()
+    val = config.get_post_time()
+    hh, mm = (int(x) for x in val.split(":"))
+    job_queue.run_daily(daily_job, time=datetime.time(hh, mm, tzinfo=IST), name="daily_post")
+    return val
+
+
+async def cmd_time(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not _only_owner(update):
+        return
+    await update.message.reply_text(f"Daily post time: {config.get_post_time()} IST")
+
+
+async def cmd_settime(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not _only_owner(update):
+        return
+    arg = " ".join(context.args).strip()
+    try:
+        val = config.set_post_time(arg)
+    except Exception:  # noqa
+        await update.message.reply_text("Usage: /settime 06:30   (24-hour, IST)")
+        return
+    _schedule_daily(context.job_queue)
+    await update.message.reply_text(f"Daily post time set to {val} IST. "
+                                    "A draft will arrive then each day.")
+
+
+async def cmd_prompt(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not _only_owner(update):
+        return
+    text = publisher.read_prompt() or "(using built-in default prompt)"
+    await update.message.reply_text(
+        "Current content prompt (edit on GitHub at agent/content_prompt.txt, "
+        "or send /setprompt followed by new text):\n\n" + text[:3500])
+
+
+async def cmd_setprompt(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not _only_owner(update):
+        return
+    parts = update.message.text.split(None, 1)
+    body = parts[1].strip() if len(parts) > 1 else ""
+    if len(body) < 40:
+        await update.message.reply_text(
+            "Send /setprompt followed by the full prompt text (keep the {clinic} and "
+            "{categories} placeholders). Tip: edit agent/content_prompt.txt on GitHub for long edits.")
+        return
+    await update.message.reply_text("Updating the content prompt on GitHub…")
+    try:
+        await asyncio.to_thread(publisher.update_prompt, body)
+    except Exception as e:  # noqa
+        log.exception("prompt update failed")
+        await update.message.reply_text(f"⚠️ Prompt update failed: {e}")
+        return
+    await update.message.reply_text("✅ Content prompt updated and committed. "
+                                    "It takes effect on the next /generate.")
 
 
 async def cmd_model(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -236,12 +300,16 @@ def main():
     app.add_handler(CommandHandler("model", cmd_model))
     app.add_handler(CommandHandler("models", cmd_models))
     app.add_handler(CommandHandler("setmodel", cmd_setmodel))
+    app.add_handler(CommandHandler("time", cmd_time))
+    app.add_handler(CommandHandler("settime", cmd_settime))
+    app.add_handler(CommandHandler("prompt", cmd_prompt))
+    app.add_handler(CommandHandler("setprompt", cmd_setprompt))
     app.add_handler(CallbackQueryHandler(on_button))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, on_text))
 
-    hh, mm = (int(x) for x in config.POST_TIME.split(":"))
-    app.job_queue.run_daily(daily_job, time=datetime.time(hh, mm, tzinfo=IST))
-    log.info("DNH Care bot started. Daily post at %s IST.", config.POST_TIME)
+    val = _schedule_daily(app.job_queue)
+    log.info("DNH Care bot started. Daily post at %s IST. Publishing to '%s'.",
+             val, config.PUBLISH_BRANCH)
     app.run_polling(allowed_updates=Update.ALL_TYPES)
 
 

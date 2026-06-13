@@ -13,10 +13,11 @@ def _git(*args, check=True):
 
 
 def sync_main():
-    """Reset the local clone to a clean origin/main before generating."""
+    """Reset the local clone to a clean origin/<publish-branch> before generating."""
+    br = config.PUBLISH_BRANCH
     _git("fetch", "origin")
-    _git("checkout", "main")
-    _git("reset", "--hard", "origin/main")
+    _git("checkout", br)
+    _git("reset", "--hard", f"origin/{br}")
     _git("clean", "-fd", "blog")
 
 
@@ -84,6 +85,29 @@ def _insert_sitemap(slug):
             f.write(sm)
 
 
+def read_prompt():
+    """Return the current content prompt text (from the synced repo file)."""
+    try:
+        return open(config.PROMPT_FILE, encoding="utf-8").read()
+    except OSError:
+        return ""
+
+
+def update_prompt(text):
+    """Re-sync, overwrite the content prompt file, commit & push the publish branch."""
+    sync_main()
+    with open(config.PROMPT_FILE, "w", encoding="utf-8") as f:
+        f.write(text.strip() + "\n")
+    _git("add", config.PROMPT_FILE)
+    _git("-c", "user.name=DNH Care Bot", "-c", "user.email=bot@dnhcare.co.in",
+         "commit", "-m", "agent: update content prompt")
+    remote = (f"https://x-access-token:{config.GITHUB_TOKEN}@github.com/"
+              f"{config.GITHUB_REPO}.git")
+    push = _git("push", remote, config.PUBLISH_BRANCH, check=False)
+    if push.returncode != 0:
+        raise RuntimeError("git push failed:\n" + push.stderr)
+
+
 def publish(post, html_str, topic):
     """Re-sync main, re-write the held draft, wire it into index + sitemap, mark the
     topic done, then commit & push main (fast-forward guaranteed). Returns live URL."""
@@ -99,7 +123,7 @@ def publish(post, html_str, topic):
          "commit", "-m", f"blog: {post.title}")
     remote = (f"https://x-access-token:{config.GITHUB_TOKEN}@github.com/"
               f"{config.GITHUB_REPO}.git")
-    push = _git("push", remote, "main", check=False)
+    push = _git("push", remote, config.PUBLISH_BRANCH, check=False)
     if push.returncode != 0:
         raise RuntimeError("git push failed:\n" + push.stderr)
     return f"https://dnhcare.co.in/blog/{post.slug}.html"
