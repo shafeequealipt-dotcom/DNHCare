@@ -10,7 +10,6 @@ Bengaluru). Keep each post original, locally useful, and tied to a service page.
 - If the queue runs low (< 5 left), add 10 fresh, non-duplicate ideas before writing.
 
 ## Queue (oldest first = next up)
-- [Skin] Acne in your 20s and 30s: why it isn't just a teenage problem
 - [Children] Building a toddler's appetite without the mealtime battles
 - [Allergies] Sinus headaches vs migraines: telling them apart
 - [Women] PCOS and irregular cycles: what a first consultation looks at
@@ -27,6 +26,7 @@ Bengaluru). Keep each post original, locally useful, and tied to a service page.
 - [Skin] Urticaria (hives): why it flares and how care approaches it
 
 ## Done (most recent first)
+- 2026-06-14 [Skin] Acne in your 20s and 30s: why it isn't just a teenage problem  -> acne-20s-30s-not-just-teenage.html
 - 2026-06-14 [Skin] Why eczema flares in Bengaluru's dry months  -> eczema-and-bengaluru-weather.html
 - 2026-06-13 [Children] The recurring-cold cycle in toddlers      -> toddler-recurring-colds.html
 - 2026-06-11 [Allergies] Dust-allergy season: a calmer approach   -> dust-allergy-season.html
