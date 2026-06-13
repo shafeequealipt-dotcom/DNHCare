@@ -2,6 +2,7 @@
 the blog index + sitemap and commit/push to main (which auto-deploys via Pages)."""
 import os
 import re
+import sys
 import subprocess
 import datetime
 from . import config, topics
@@ -48,7 +49,9 @@ def stage_draft(slug, html_str):
 def run_gate(path):
     """Run agent/check_post.py. Returns (ok: bool, output: str)."""
     rel = os.path.relpath(path, config.REPO_DIR)
-    p = subprocess.run(["python", config.CHECK_SCRIPT, rel],
+    # Use the same interpreter running the bot (the venv python) — "python" may not
+    # exist on the VM (Ubuntu only ships python3).
+    p = subprocess.run([sys.executable, config.CHECK_SCRIPT, rel],
                        cwd=config.REPO_DIR, capture_output=True, text=True)
     return p.returncode == 0, (p.stdout + p.stderr).strip()
 
