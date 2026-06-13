@@ -54,11 +54,17 @@ trick = canvas image-sequence scrub.
 - RULES: every post MUST have .med-disclaimer + author-box (E-E-A-T). NO overclaims (cure/guaranteed/no side effects/miracle).
   link to the matching service page. keep ~600-900 words, real local value, original.
 
-## DAILY AGENT  (PENDING — stage 2, not built yet)
-- GOAL = generate 1 new post per day INTO /blog/, draft only, open PR development->main for user review.
+## DAILY AGENT  (machinery BUILT on development; live cron = pending user go-ahead)
+- GOAL = 1 new post/day INTO /blog/, DRAFT only, open PR -> human merges -> auto-deploys.
 - user decided: DRAFT + PR review gate (NOT auto-publish). daily cadence.
-- safe design: agent writes post -> safety check (no overclaims, has disclaimer) -> commit on dated branch -> `gh pr create --base main`.
-- runtime = scheduled cloud routine (see `schedule` skill / CronCreate). NOT built yet — design + confirm with user next.
+- BUILT (in /agent/):
+    daily-post.md  = the agent playbook/prompt. follow it step by step each run.
+    topics.md      = rolling keyword-mapped topic queue. take top of Queue, move to Done.
+    check_post.py  = deterministic gate. `python agent/check_post.py blog/<slug>.html`.
+                     blocks overclaims, missing disclaimer/author/schema/canonical/CTA, thin (<380w), no service link.
+- HOW THE LIVE AGENT RUNS = a scheduled cloud routine (schedule skill / CronCreate) that each day
+  runs the daily-post.md playbook in a clone, and opens a PR. STILL TO CREATE.
+- TO ACTIVATE = need from user: run TIME (IST) + go-ahead. then create the cron routine pointing at agent/daily-post.md.
 
 ## FILES (the whole site)
 - index.html ............ homepage. 2 scrub sections (#hero, #philosophy) + about/services/stories/faq/visit.
