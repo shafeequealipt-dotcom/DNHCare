@@ -54,17 +54,25 @@ trick = canvas image-sequence scrub.
 - RULES: every post MUST have .med-disclaimer + author-box (E-E-A-T). NO overclaims (cure/guaranteed/no side effects/miracle).
   link to the matching service page. keep ~600-900 words, real local value, original.
 
-## DAILY AGENT  (machinery BUILT on development; live cron = pending user go-ahead)
-- GOAL = 1 new post/day INTO /blog/, DRAFT only, open PR -> human merges -> auto-deploys.
-- user decided: DRAFT + PR review gate (NOT auto-publish). daily cadence.
-- BUILT (in /agent/):
-    daily-post.md  = the agent playbook/prompt. follow it step by step each run.
-    topics.md      = rolling keyword-mapped topic queue. take top of Queue, move to Done.
-    check_post.py  = deterministic gate. `python agent/check_post.py blog/<slug>.html`.
-                     blocks overclaims, missing disclaimer/author/schema/canonical/CTA, thin (<380w), no service link.
-- HOW THE LIVE AGENT RUNS = a scheduled cloud routine (schedule skill / CronCreate) that each day
-  runs the daily-post.md playbook in a clone, and opens a PR. STILL TO CREATE.
-- TO ACTIVATE = need from user: run TIME (IST) + go-ahead. then create the cron routine pointing at agent/daily-post.md.
+## DAILY AGENT  (Python + Telegram bot on Oracle — BUILT on development)
+- GOAL = 1 new post/day INTO /blog/, DRAFT only -> sent to Telegram with Approve/Reject ->
+  on Approve the bot commits to main -> GitHub Pages auto-deploys. Approval happens IN TELEGRAM.
+- ARCHITECTURE = standing Python service on the user's Oracle Cloud VM (systemd), long-polling Telegram.
+- CODE = /agent/bot/  (a Python package):
+    config.py    = loads agent/bot/.env; brand constants; category->service-page map.
+    topics.py    = read/add/consume agent/topics.md; autoselect_viral_topic() uses Claude + web_search.
+    content.py   = Claude (claude-opus-4-8, messages.parse -> Pydantic Post) writes structured content;
+                   Python assembles the post HTML deterministically (schema/disclaimer/author/canonical/CTA always present).
+    publisher.py = sync main, stage draft, run gate, on approve: insert blog index card + sitemap loc + mark topic done + git commit/push main.
+    bot.py       = telegram bot: JobQueue daily at POST_TIME (IST); /generate /topics /addtopic; Approve/Reject buttons; Reject->reply feedback->regenerate.
+    check_post.py (in /agent/) = the deterministic gate, run on every draft before it's shown.
+    deploy/dnhcare-bot.service + SETUP-ORACLE.md = systemd unit + full Oracle deploy guide.
+- SECRETS (user provides in agent/bot/.env on the VM): TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID,
+  ANTHROPIC_API_KEY, GITHUB_TOKEN (fine-grained PAT, Contents:RW on DNHCare), REPO_DIR, POST_TIME.
+- IMPORTANT = the bot's working clone (REPO_DIR) must be on **main** and must contain blog/ + agent/ + agent/bot/.
+  So MERGE development->main before deploying (blog + agent + bot all land on main together).
+- TESTED locally: modules compile, template passes the gate (806 words), JSON-LD valid, topics parser works.
+  NOT yet run live (needs the user's Telegram/Anthropic/GitHub secrets on the Oracle VM).
 
 ## FILES (the whole site)
 - index.html ............ homepage. 2 scrub sections (#hero, #philosophy) + about/services/stories/faq/visit.

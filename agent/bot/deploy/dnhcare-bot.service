@@ -1,0 +1,16 @@
+[Unit]
+Description=DNH Care daily blog agent (Telegram-controlled)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=dnhcare
+WorkingDirectory=/opt/dnhcare/DNHCare
+ExecStart=/opt/dnhcare/venv/bin/python -m agent.bot.bot
+Restart=always
+RestartSec=10
+# .env is loaded by config.py via python-dotenv; no EnvironmentFile needed.
+
+[Install]
+WantedBy=multi-user.target
