@@ -35,6 +35,31 @@ trick = canvas image-sequence scrub.
   WHY = Higgsfield workspace had 0 credits. NOT real AI clips yet.
   TO SWAP REAL CLIPS = see README.md. slice with ffmpeg into same folders. no code change.
 
+## BLOG / JOURNAL  (feature B — built on development)
+- LIVES IN = /blog/ folder.  URL = dnhcare.co.in/blog/
+- blog/index.html = journal index. card grid. lists all posts. Blog schema.
+- blog/<slug>.html = one post each. seed posts:
+    eczema-and-bengaluru-weather.html (Skin)
+    toddler-recurring-colds.html (Children)
+    dust-allergy-season.html (Allergies)
+- POST TEMPLATE (copy an existing post, it has everything):
+    head: title, meta desc, canonical (.html), og, BlogPosting schema + BreadcrumbList schema.
+    body: nav (../ paths, Journal active), scroll-progress, article-hero (breadcrumb + .post-cat-tag + h1 + .post-meta),
+          main.article (.lede para, h2 sections, .med-disclaimer, .author-box, cta-row, .related),
+          footer-grid + footer + action-bar + scroll script.
+    paths from /blog/ = ../styles.css, ../index.html, ../skin-treatment.html, journal = index.html.
+- WHEN ADDING A POST also: add a <a class="post-card"> to blog/index.html #posts (newest first),
+  and add <loc> to sitemap.xml.
+- "Journal" nav link is on ALL pages (root pages -> blog/index.html ; blog pages -> index.html).
+- RULES: every post MUST have .med-disclaimer + author-box (E-E-A-T). NO overclaims (cure/guaranteed/no side effects/miracle).
+  link to the matching service page. keep ~600-900 words, real local value, original.
+
+## DAILY AGENT  (PENDING — stage 2, not built yet)
+- GOAL = generate 1 new post per day INTO /blog/, draft only, open PR development->main for user review.
+- user decided: DRAFT + PR review gate (NOT auto-publish). daily cadence.
+- safe design: agent writes post -> safety check (no overclaims, has disclaimer) -> commit on dated branch -> `gh pr create --base main`.
+- runtime = scheduled cloud routine (see `schedule` skill / CronCreate). NOT built yet — design + confirm with user next.
+
 ## FILES (the whole site)
 - index.html ............ homepage. 2 scrub sections (#hero, #philosophy) + about/services/stories/faq/visit.
 - skin-treatment.html ... service page (full template).
@@ -104,7 +129,7 @@ DONE:
 
 ## FEATURE BACKLOG  (proposed, NOT built. user chooses.)
 A. Booking/enquiry form section (name+phone+concern -> WhatsApp prefilled or Formspree). conversion + dwell time.
-B. Blog / articles section (homeopathy topics) — biggest long-tail SEO lever. each post = new ranking page.
+B. Blog / articles section — DONE (built on development). daily agent = stage 2, pending.
 C. Real doctor photo + clinic photos (replace abstract frames in spots) — E-E-A-T trust + GBP sync.
 D. Google reviews live widget (pull real reviews) instead of static quotes.
 E. Hindi/Kannada language toggle — local audience reach.
