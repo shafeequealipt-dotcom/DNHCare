@@ -13,8 +13,21 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,500&family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://dnhcare.co.in/" },
+      { "@type": "ListItem", "position": 2, "name": "Treatments", "item": "https://dnhcare.co.in/#services" },
+      { "@type": "ListItem", "position": 3, "name": "Migraine & headaches", "item": "https://dnhcare.co.in/migraine-treatment" }
+    ]
+  }
+  </script>
 </head>
 <body>
+  <div class="scroll-progress" aria-hidden="true"><b></b></div>
+
   <nav class="nav">
     <a class="brand" href="index.html">DNH<span> CARE</span><em>Dr. Nafia's Homoeopathic Medical Centre</em></a>
     <div class="nav-links">
@@ -36,6 +49,9 @@
   </nav>
 
   <header class="article-hero">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="index.html">Home</a> › <a href="index.html#services">Treatments</a> › Migraine &amp; headaches
+    </nav>
     <p class="kicker">Treatments · Migraine</p>
     <h1>Homeopathic Migraine and Headache Care</h1>
   </header>
@@ -66,20 +82,75 @@
     for migraine or any other condition, continue it and bring the prescriptions along — changes to
     prescribed medicines belong with the doctor who prescribed them.</p>
 
+    <h2>Common questions about migraine care</h2>
+    <div class="faqs">
+      <details><summary>Can homeopathy reduce how often my migraines happen?</summary><p>Treatment is planned around reducing the frequency and intensity of attacks over time. Realistic expectations are set at your first visit based on your history.</p></details>
+      <details><summary>Should I keep taking my painkillers?</summary><p>Yes — do not stop prescribed medication on your own. Bring it along so treatment is coordinated with what you already take.</p></details>
+    </div>
+
     <h2>Visit us</h2>
     <p>Opp. KK School, Gunjur Main Road, Varthur, Bengaluru 560087 — serving Varthur, Gunjur,
-    Whitefield and Sarjapur Road. The clinic holds a 4.9-star Google rating.<br/>
+    Whitefield and Sarjapur Road. The clinic holds a 4.9-star Google rating from 150+ reviews.<br/>
     Mon–Sat, 10am–1pm and 4pm–8pm. Call <a href="tel:+919663779358" style="color:var(--gold)">+91 96637 79358</a> or book online.</p>
 
     <div class="cta-row">
       <a class="big-cta" href="https://wa.me/919663779358" target="_blank" rel="noopener">Book a consultation</a>
       <a class="back-link" href="index.html#services">← All treatments</a>
     </div>
+
+    <div class="related">
+      <h2>Related treatments</h2>
+      <div class="related-row">
+        <a href="womens-health.html"><span>Hormonal migraine</span>Women's health &amp; thyroid</a>
+        <a href="allergy-treatment.html"><span>Sinus headaches</span>Allergies &amp; sinusitis</a>
+        <a href="skin-treatment.html"><span>Stress-linked</span>Skin complaints</a>
+      </div>
+    </div>
   </main>
 
+  <div class="footer-grid">
+    <div>
+      <h5>Dr. Nafia's Homoeopathic Medical Centre</h5>
+      <p>Opp. KK School, Gunjur Main Road, Varthur,<br/>Bengaluru, Karnataka 560087<br/>
+      <a href="tel:+919663779358">+91 96637 79358</a> · Mon–Sat, 10am–1pm &amp; 4pm–8pm</p>
+    </div>
+    <div>
+      <h5>Treatments</h5>
+      <ul>
+        <li><a href="skin-treatment.html">Skin complaints</a></li>
+        <li><a href="allergy-treatment.html">Allergies &amp; sinusitis</a></li>
+        <li><a href="pediatric-care.html">Pediatric care</a></li>
+        <li><a href="migraine-treatment.html">Migraine &amp; headaches</a></li>
+        <li><a href="womens-health.html">Women's health &amp; thyroid</a></li>
+      </ul>
+    </div>
+    <div>
+      <h5>Areas served</h5>
+      <ul>
+        <li>Varthur</li>
+        <li>Gunjur</li>
+        <li>Whitefield</li>
+        <li>Sarjapur Road</li>
+        <li>Balagere</li>
+      </ul>
+    </div>
+  </div>
   <footer class="footer">
-    <address>Dr. Nafia's Homoeopathic Medical Centre, Opp. KK School, Gunjur Main Road, Varthur, Bengaluru, Karnataka 560087 · <a href="tel:+919663779358">+91 96637 79358</a></address>
     <span>© 2026 Dr. Nafia's Homoeopathic Medical Centre (DNH Care) · Healing, the gentle way.</span>
   </footer>
+
+  <div class="action-bar">
+    <a href="tel:+919663779358"><strong>Call</strong></a>
+    <a href="https://wa.me/919663779358" target="_blank" rel="noopener"><strong>WhatsApp</strong></a>
+    <a href="https://www.google.com/maps/dir/?api=1&destination=Dr.+Nafia's+Homoeopathic+Medical+Centre+Gunjur+Main+Road+Varthur+Bengaluru" target="_blank" rel="noopener"><strong>Directions</strong></a>
+  </div>
+
+  <script>
+    addEventListener("scroll", () => {
+      const b = document.querySelector(".scroll-progress b");
+      const max = document.documentElement.scrollHeight - innerHeight;
+      if (b) b.style.width = (max > 0 ? (scrollY / max) * 100 : 0) + "%";
+    }, { passive: true });
+  </script>
 </body>
 </html>
