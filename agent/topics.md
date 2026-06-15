@@ -10,7 +10,6 @@ Bengaluru). Keep each post original, locally useful, and tied to a service page.
 - If the queue runs low (< 5 left), add 10 fresh, non-duplicate ideas before writing.
 
 ## Queue (oldest first = next up)
-- [Allergies] Pet dander, pollen, dust: finding your real trigger
 - [Skin] Psoriasis through the seasons: a gentler routine
 - [Migraine] Keeping a headache diary that actually helps your doctor
 - [Women] Perimenopause: small changes that ease the transition
@@ -19,6 +18,7 @@ Bengaluru). Keep each post original, locally useful, and tied to a service page.
 - [Skin] Urticaria (hives): why it flares and how care approaches it
 
 ## Done (most recent first)
+- 2026-06-15 [Allergies] Pet dander, pollen, dust: finding your real trigger  -> pet-dander-allergy-treatment-varthur.html
 - 2026-06-15 [Women] Thyroid and tiredness: the symptoms people dismiss  -> thyroid-tiredness-women-varthur.html
 - 2026-06-14 [Children] When a child's cough lingers after the cold has gone  -> child-lingering-cough-after-cold-varthur.html
 - 2026-06-14 [Skin] Hair fall in Bengaluru's water: separating myth from cause  -> hair-fall-hard-water-bengaluru-varthur.html
