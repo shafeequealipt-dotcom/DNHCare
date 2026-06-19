@@ -150,8 +150,18 @@ PUSH PENDING CHANGES (on development) =
 DONE:
 - title/meta/OG/canonical on every page. geo-keyworded ("Varthur, Bengaluru").
 - 1 clean H1 per page.
-- JSON-LD: MedicalClinic (+aggregateRating 4.9/150, hasMap, areaServed, openingHours, physician),
-  FAQPage (home), BreadcrumbList (every service page).
+- JSON-LD: MedicalClinic (+aggregateRating 4.9/150, hasMap, areaServed, openingHours, physician,
+    priceRange, currenciesAccepted, paymentAccepted, logo, availableService list),
+  FAQPage (home + ALL 5 service pages), BreadcrumbList (every service page + blog posts).
+- ADDED 2026-06-19: Physician entity @id=/#doctor (full credentials, BHMS + PG Diploma, E-E-A-T).
+- ADDED 2026-06-19: WebSite entity @id=/#website (domain graph node, linked to clinic).
+- ADDED 2026-06-19: MedicalTherapy entity on each service page (medicineSystem=Homeopathic,
+    relevantSpecialty per page, indication list, provider→#clinic).
+- ADDED 2026-06-19: MedicalWebPage on each service page (reviewedBy→#doctor, medicalAudience=Patients,
+    about→therapy entity, isPartOf→#website, lastReviewed=2026-06-14).
+- ADDED 2026-06-19: BlogPosting enhanced: author @id→#doctor, reviewedBy→#doctor, isPartOf→#website.
+- ADDED 2026-06-19: FAQPage auto-generated per blog post (from post.faqs) in content.py template.
+- ADDED 2026-06-19: favicon.svg (branded green+gold "D") on all pages.
 - visible FAQ matches FAQPage schema EXACTLY (YMYL-safe wording, no "cure"/"no side effects").
 - 5 service pages, internal-linked: nav "Treatments" dropdown + homepage cards + footer + related-treatment blocks.
 - crawlable NAP in 3-col footer + areas served.
@@ -179,7 +189,7 @@ F. "Book appointment" calendar (Calendly-style) embed.
 G. Symptom -> treatment finder (small interactive quiz) — engagement + internal linking.
 H. Deploy live (Netlify/Vercel/Cloudflare Pages) w/ clean URLs + real domain swap from Framer.
 I. Web vitals / analytics (GA4 or Plausible) + Search Console wiring.
-J. Service schema per treatment page (MedicalProcedure / Service) for richer results.
+J. Service schema per treatment page — DONE (MedicalTherapy + MedicalWebPage + FAQPage on all 5 service pages, 2026-06-19).
 
 ## RULES / GOTCHAS
 - SEO = FIRST objective. every change must not hurt crawlability or page speed.

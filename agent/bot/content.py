@@ -146,6 +146,12 @@ def render_html(post: Post, recent_posts: List[dict]) -> str:
     keywords_str = ", ".join(kw_list)
     keywords_json = json.dumps(keywords_str)
     keywords_meta = _esc(keywords_str)
+    # FAQPage schema items from post FAQs
+    faq_schema_items = json.dumps([
+        {"@type": "Question", "name": f.question,
+         "acceptedAnswer": {"@type": "Answer", "text": f.answer}}
+        for f in post.faqs
+    ], indent=4, ensure_ascii=False)
 
     sections_html = []
     for s in post.sections:
@@ -183,6 +189,7 @@ def render_html(post: Post, recent_posts: List[dict]) -> str:
   <meta property="og:url" content="https://dnhcare.co.in/blog/{post.slug}.html" />
   <meta property="og:title" content="{title_t}" />
   <meta property="og:description" content="{meta}" />
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,500&family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="../styles.css?v=2" />
@@ -190,6 +197,7 @@ def render_html(post: Post, recent_posts: List[dict]) -> str:
   {{
     "@context": "https://schema.org",
     "@type": "BlogPosting",
+    "@id": "https://dnhcare.co.in/blog/{post.slug}.html#post",
     "headline": {title_json},
     "description": {meta_json},
     "datePublished": "{today}",
@@ -198,8 +206,16 @@ def render_html(post: Post, recent_posts: List[dict]) -> str:
     "keywords": {keywords_json},
     "url": "https://dnhcare.co.in/blog/{post.slug}.html",
     "mainEntityOfPage": "https://dnhcare.co.in/blog/{post.slug}.html",
-    "author": {{ "@type": "Person", "name": "Dr. Nafia M", "jobTitle": "Homeopathic Physician", "alumniOf": "Vinayaka Mission University" }},
-    "publisher": {{ "@type": "MedicalClinic", "name": "Dr. Nafia's Homoeopathic Medical Centre", "@id": "https://dnhcare.co.in/#clinic" }}
+    "author": {{
+      "@type": "Person",
+      "@id": "https://dnhcare.co.in/#doctor",
+      "name": "Dr. Nafia M",
+      "jobTitle": "Homeopathic Physician",
+      "alumniOf": "Vinayaka Mission University"
+    }},
+    "reviewedBy": {{ "@id": "https://dnhcare.co.in/#doctor" }},
+    "publisher": {{ "@type": "MedicalClinic", "name": "Dr. Nafia's Homoeopathic Medical Centre", "@id": "https://dnhcare.co.in/#clinic" }},
+    "isPartOf": {{ "@id": "https://dnhcare.co.in/#website" }}
   }}
   </script>
   <script type="application/ld+json">
@@ -211,6 +227,13 @@ def render_html(post: Post, recent_posts: List[dict]) -> str:
       {{ "@type": "ListItem", "position": 2, "name": "Journal", "item": "https://dnhcare.co.in/blog/" }},
       {{ "@type": "ListItem", "position": 3, "name": {crumb_json}, "item": "https://dnhcare.co.in/blog/{post.slug}.html" }}
     ]
+  }}
+  </script>
+  <script type="application/ld+json">
+  {{
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": {faq_schema_items}
   }}
   </script>
 </head>
