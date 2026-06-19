@@ -5,21 +5,45 @@ READ THIS FILE ALONE = KNOW EVERYTHING. PUSH TO GITHUB. DONE.
 
 ---
 
-## STATUS (2026-06-14) — LIVE
-- SITE IS LIVE at dnhcare.co.in. main == development. full v2 site + blog + 5 posts + SEO all deployed.
+## STATUS (2026-06-19) — LIVE + STAGING/PROD PIPELINE ACTIVE
+- SITE IS LIVE at dnhcare.co.in (GitHub Pages, main branch). DNS cutover to Oracle pending (user action).
 - BACKUP of old main = branch `backup-main-20260614` (commit df23bf7). rollback = `git push -f origin backup-main-20260614:main`.
-- LOCAL BOT is running (this machine), PUBLISH_BRANCH=main -> Approve publishes LIVE. token via `gh auth token`.
-  launcher = C:\Projects\3DWebsites\run_bot.ps1 (kills old + relaunches). restart from bash:
-  `export GITHUB_TOKEN=$(gh auth token); powershell.exe -File C:\Projects\3DWebsites\run_bot.ps1 > log 2>&1` (run_in_background).
 - ORACLE DEPLOY = DONE (2026-06-14). bot runs 24/7 on the Oracle VM as a systemd service.
-    host = ubuntu@140.245.230.251 (Ubuntu 22.04). ssh key (local) = ~/.ssh/oracle.key (copy of C:\Projects\Orcale\ssh-key-2026-05-25 (1).key).
-    deploy dir = /home/ubuntu/DNHCare ; venv = /home/ubuntu/dnhvenv ; secrets = /home/ubuntu/DNHCare/agent/bot/.env (chmod 600).
+    host = ubuntu@140.245.230.251 (Ubuntu 22.04). ssh key (local) = ~/.ssh/oracle.key.
+    venv = /home/ubuntu/dnhvenv ; secrets = /home/ubuntu/DNHCare/agent/bot/.env (chmod 600).
     service = dnhcare-bot (systemd, enabled=survives reboot). manage: `sudo systemctl {status|restart|stop} dnhcare-bot` ; logs `journalctl -u dnhcare-bot -f`.
     config: PUBLISH_BRANCH=main, POST_TIME=06:00 IST, model=openai/gpt-oss-120b:free, token=DNH_Github_Token (fine-grained PAT, Contents:R/W).
-    to pull new code onto the VM: `ssh ... 'cd ~/DNHCare && git pull && sudo systemctl restart dnhcare-bot'`.
-- LOCAL bot = STOPPED (Oracle is the only instance now). RUN ONLY ONE BOT (same Telegram token -> 409). don't restart local while Oracle runs.
-- GOTCHA hit during deploy: fine-grained PAT needs **Contents: Read AND write** + the repo selected under "Only select repositories"
-  (public-read-only access = push denied 403). API /user can be valid while git push 403s if Contents:write is missing.
+- LOCAL bot = STOPPED (Oracle is the only instance). RUN ONLY ONE BOT (same Telegram token -> 409).
+- GOTCHA hit during deploy: fine-grained PAT needs **Contents: Read AND write** + the repo selected under "Only select repositories".
+
+## HOSTING ARCHITECTURE (2026-06-19)
+TWO ENVIRONMENTS ON ORACLE VM (140.245.230.251):
+  production  = ~/DNHCare          (main branch)      -> dnhcare.co.in
+  staging     = ~/DNHCare-staging  (development branch)-> staging.dnhcare.co.in
+
+AUTO-DEPLOY via GitHub Actions (secrets: ORACLE_SSH_KEY, ORACLE_HOST):
+  push to development -> .github/workflows/deploy-staging.yml    -> ssh pulls ~/DNHCare-staging
+  push/merge to main  -> .github/workflows/deploy-production.yml -> ssh pulls ~/DNHCare
+
+BOT FLOW (2026-06-19):
+  bot generates post -> Approve in Telegram -> pushes to main -> deploy-production.yml -> dnhcare.co.in live in ~15s
+  staging.dnhcare.co.in = used for manual dev/design changes (push to development branch)
+
+NGINX on Oracle (already installed + active):
+  /etc/nginx/sites-enabled/dnhcare.co.in         -> serves ~/DNHCare (clean URLs: /blog/my-post)
+  /etc/nginx/sites-enabled/staging.dnhcare.co.in -> serves ~/DNHCare-staging
+
+SSL = certbot already installed. run AFTER DNS propagates:
+  sudo certbot --nginx -d dnhcare.co.in -d www.dnhcare.co.in --non-interactive --agree-tos -m shafeequealipt@gmail.com
+  sudo certbot --nginx -d staging.dnhcare.co.in --non-interactive --agree-tos -m shafeequealipt@gmail.com
+
+DNS CHANGES NEEDED (user does in registrar — PENDING):
+  dnhcare.co.in     A record -> 140.245.230.251  (remove GitHub Pages CNAME first)
+  www.dnhcare.co.in A record -> 140.245.230.251
+  staging.dnhcare.co.in A record -> 140.245.230.251
+
+CLEAN URLs: Nginx rewrites /blog/my-post -> serves blog/my-post.html (no extension in URL).
+  Old .html URLs 301-redirect to clean URLs automatically.
 
 ---
 
@@ -97,8 +121,8 @@ trick = canvas image-sequence scrub.
     Telegram = SYSTEM env vars DNH_Telegram_Token + DNH_Telegram_ID (already set on user's Windows machine; export on the VM).
     OPENROUTER_API_KEY = system env (already set) or .env.
     in agent/bot/.env: GITHUB_TOKEN (fine-grained PAT, Contents:RW on DNHCare), REPO_DIR, POST_TIME, optional DEFAULT_MODEL.
-- IMPORTANT = the bot's working clone (REPO_DIR) must be on **main** and must contain blog/ + agent/ + agent/bot/.
-  So MERGE development->main before deploying (blog + agent + bot all land on main together).
+- IMPORTANT = bot REPO_DIR = /home/ubuntu/DNHCare-staging (development branch). Bot pushes to development.
+  GitHub Actions deploy-staging.yml auto-pulls staging. User merges dev->main -> deploy-production.yml auto-pulls production.
 - TESTED locally: modules compile; live OpenRouter free-model generation produced a valid post that PASSED the gate
   (627 words); model set/get persistence works; JSON-LD valid. NOT yet run live on the VM (needs GitHub PAT + VM).
 
@@ -126,11 +150,10 @@ OR:  cd to folder, `python -m http.server 8347`, open http://localhost:8347
 - REPO = https://github.com/shafeequealipt-dotcom/DNHCare
 - account = shafeequealipt-dotcom (gh already logged in)
 - branch = main
-- DEPLOY = GitHub Pages. CNAME file = dnhcare.co.in  (Pages serves at the REAL domain).
-  -> KEEP the CNAME file. never delete. if rebase needed, preserve it.
-  -> Pages serves files at real path: /skin-treatment.html (NOT /skin-treatment).
-  -> so all canonical/og/sitemap URLs use .html to match (no 404 canonicals). home = "/".
-  -> NOTE: was the old Framer site live at dnhcare.co.in. DNS may or may not point to Pages yet.
+- DEPLOY = Oracle VM via Nginx (replacing GitHub Pages). See HOSTING ARCHITECTURE above.
+  -> CNAME file preserved (needed until DNS cutover fully completes, then can be left or removed).
+  -> Oracle Nginx serves clean URLs: /blog/my-post (not .html). Old .html URLs 301 to clean.
+  -> canonical/og/schema URLs: update to clean URLs once DNS is live on Oracle.
 - BRANCHES:
     main        = LIVE. deploys to dnhcare.co.in. only touch via approved merge.
     development = WORK HERE. push freely, does NOT deploy. (current default branch for changes.)

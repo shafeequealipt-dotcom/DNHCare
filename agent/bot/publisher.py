@@ -70,7 +70,7 @@ def _insert_schema_entry(post):
     html = open(idx, encoding="utf-8").read()
     slug = post.slug
     title_json = _json.dumps(post.title)
-    url = f"https://dnhcare.co.in/blog/{slug}.html"
+    url = f"https://dnhcare.co.in/blog/{slug}"
 
     # 1. Prepend into Blog.blogPost array (newest first)
     bp_entry = (f'\n      {{"@type": "BlogPosting", "@id": "{url}#post", '
@@ -102,7 +102,7 @@ def _insert_index_card(post):
     idx = os.path.join(config.BLOG_DIR, "index.html")
     html = open(idx, encoding="utf-8").read()
     nice_date = datetime.date.today().strftime("%d %b %Y")
-    card = (f'    <a class="post-card" href="{post.slug}.html">\n'
+    card = (f'    <a class="post-card" href="{post.slug}">\n'
             f'      <span class="post-cat">{post.category}</span>\n'
             f'      <h2>{post.title}</h2>\n'
             f'      <p>{post.meta_description}</p>\n'
@@ -116,7 +116,7 @@ def _insert_index_card(post):
 
 def _insert_sitemap(slug):
     sm = open(config.SITEMAP_FILE, encoding="utf-8").read()
-    loc = (f"  <url><loc>https://dnhcare.co.in/blog/{slug}.html</loc>"
+    loc = (f"  <url><loc>https://dnhcare.co.in/blog/{slug}</loc>"
            f"<priority>0.6</priority></url>\n")
     if slug not in sm:
         sm = sm.replace("</urlset>", loc + "</urlset>", 1)

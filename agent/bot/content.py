@@ -131,6 +131,7 @@ def render_html(post: Post, recent_posts: List[dict]) -> str:
     """recent_posts: list of {slug, title, category} for the 'Keep reading' block."""
     today = datetime.date.today().isoformat()
     svc_file, svc_label = config.CATEGORY_SERVICE[post.category]
+    svc_url = svc_file.removesuffix('.html')
     title_t = _esc(post.title)
     meta = _esc(post.meta_description)
     crumb_title = _esc(post.title)
@@ -169,10 +170,10 @@ def render_html(post: Post, recent_posts: List[dict]) -> str:
         f"      <details><summary>{_esc(f.question)}</summary>"
         f"<p>{_esc(f.answer)}</p></details>" for f in post.faqs)
 
-    related = [f'        <a href="{svc_file}"><span>Treatment</span>{_esc(svc_label)}</a>']
+    related = [f'        <a href="{svc_url}"><span>Treatment</span>{_esc(svc_label)}</a>']
     for rp in recent_posts[:2]:
         related.append(
-            f'        <a href="{rp["slug"]}.html"><span>{_esc(rp["category"])}</span>'
+            f'        <a href="{rp["slug"]}"><span>{_esc(rp["category"])}</span>'
             f'{_esc(rp["title"])}</a>')
     related_html = "\n".join(related)
 
@@ -184,9 +185,9 @@ def render_html(post: Post, recent_posts: List[dict]) -> str:
   <title>{title_t} | DNH Care Journal</title>
   <meta name="description" content="{meta}" />
   <meta name="keywords" content="{keywords_meta}" />
-  <link rel="canonical" href="https://dnhcare.co.in/blog/{post.slug}.html" />
+  <link rel="canonical" href="https://dnhcare.co.in/blog/{post.slug}" />
   <meta property="og:type" content="article" />
-  <meta property="og:url" content="https://dnhcare.co.in/blog/{post.slug}.html" />
+  <meta property="og:url" content="https://dnhcare.co.in/blog/{post.slug}" />
   <meta property="og:title" content="{title_t}" />
   <meta property="og:description" content="{meta}" />
   <link rel="icon" href="../favicon.svg" type="image/svg+xml" />
@@ -197,15 +198,15 @@ def render_html(post: Post, recent_posts: List[dict]) -> str:
   {{
     "@context": "https://schema.org",
     "@type": "BlogPosting",
-    "@id": "https://dnhcare.co.in/blog/{post.slug}.html#post",
+    "@id": "https://dnhcare.co.in/blog/{post.slug}#post",
     "headline": {title_json},
     "description": {meta_json},
     "datePublished": "{today}",
     "dateModified": "{today}",
     "articleSection": {cat_json},
     "keywords": {keywords_json},
-    "url": "https://dnhcare.co.in/blog/{post.slug}.html",
-    "mainEntityOfPage": "https://dnhcare.co.in/blog/{post.slug}.html",
+    "url": "https://dnhcare.co.in/blog/{post.slug}",
+    "mainEntityOfPage": "https://dnhcare.co.in/blog/{post.slug}",
     "author": {{
       "@type": "Person",
       "@id": "https://dnhcare.co.in/#doctor",
@@ -225,7 +226,7 @@ def render_html(post: Post, recent_posts: List[dict]) -> str:
     "itemListElement": [
       {{ "@type": "ListItem", "position": 1, "name": "Home", "item": "https://dnhcare.co.in/" }},
       {{ "@type": "ListItem", "position": 2, "name": "Journal", "item": "https://dnhcare.co.in/blog/" }},
-      {{ "@type": "ListItem", "position": 3, "name": {crumb_json}, "item": "https://dnhcare.co.in/blog/{post.slug}.html" }}
+      {{ "@type": "ListItem", "position": 3, "name": {crumb_json}, "item": "https://dnhcare.co.in/blog/{post.slug}" }}
     ]
   }}
   </script>
@@ -241,28 +242,28 @@ def render_html(post: Post, recent_posts: List[dict]) -> str:
   <div class="scroll-progress" aria-hidden="true"><b></b></div>
 
   <nav class="nav">
-    <a class="brand" href="../index.html">DNH<span> CARE</span><em>Dr. Nafia's Homoeopathic Medical Centre</em></a>
+    <a class="brand" href="../">DNH<span> CARE</span><em>Dr. Nafia's Homoeopathic Medical Centre</em></a>
     <div class="nav-links">
-      <a href="../index.html#about">About</a>
+      <a href="../#about">About</a>
       <div class="nav-drop">
-        <a href="../index.html#services">Treatments &#9662;</a>
+        <a href="../#services">Treatments &#9662;</a>
         <div class="drop-menu">
-          <a href="../skin-treatment.html">Skin Complaints</a>
-          <a href="../allergy-treatment.html">Allergies &amp; Sinusitis</a>
-          <a href="../pediatric-care.html">Pediatric Care</a>
-          <a href="../migraine-treatment.html">Migraine &amp; Headaches</a>
-          <a href="../womens-health.html">Women's Health &amp; Thyroid</a>
+          <a href="../skin-treatment">Skin Complaints</a>
+          <a href="../allergy-treatment">Allergies &amp; Sinusitis</a>
+          <a href="../pediatric-care">Pediatric Care</a>
+          <a href="../migraine-treatment">Migraine &amp; Headaches</a>
+          <a href="../womens-health">Women's Health &amp; Thyroid</a>
         </div>
       </div>
-      <a href="index.html">Journal</a>
-      <a href="../index.html#visit">Visit</a>
+      <a href="./">Journal</a>
+      <a href="../#visit">Visit</a>
     </div>
     <a class="nav-cta" href="https://wa.me/919663779358" target="_blank" rel="noopener">Book on WhatsApp</a>
   </nav>
 
   <header class="article-hero">
     <nav class="crumbs" aria-label="Breadcrumb">
-      <a href="../index.html">Home</a> &rsaquo; <a href="index.html">Journal</a> &rsaquo; {crumb_title}
+      <a href="../">Home</a> &rsaquo; <a href="./">Journal</a> &rsaquo; {crumb_title}
     </nav>
     <span class="post-cat-tag">{post.category}</span>
     <h1>{title_t}</h1>
@@ -293,7 +294,7 @@ def render_html(post: Post, recent_posts: List[dict]) -> str:
 
     <div class="cta-row">
       <a class="big-cta" href="https://wa.me/919663779358" target="_blank" rel="noopener">Book a consultation</a>
-      <a class="back-link" href="../{svc_file}">{_esc(svc_label)} &rarr;</a>
+      <a class="back-link" href="../{svc_url}">{_esc(svc_label)} &rarr;</a>
     </div>
 
     <div class="author-box">
@@ -323,11 +324,11 @@ def render_html(post: Post, recent_posts: List[dict]) -> str:
     <div>
       <h5>Treatments</h5>
       <ul>
-        <li><a href="../skin-treatment.html">Skin complaints</a></li>
-        <li><a href="../allergy-treatment.html">Allergies &amp; sinusitis</a></li>
-        <li><a href="../pediatric-care.html">Pediatric care</a></li>
-        <li><a href="../migraine-treatment.html">Migraine &amp; headaches</a></li>
-        <li><a href="../womens-health.html">Women's health &amp; thyroid</a></li>
+        <li><a href="../skin-treatment">Skin complaints</a></li>
+        <li><a href="../allergy-treatment">Allergies &amp; sinusitis</a></li>
+        <li><a href="../pediatric-care">Pediatric care</a></li>
+        <li><a href="../migraine-treatment">Migraine &amp; headaches</a></li>
+        <li><a href="../womens-health">Women's health &amp; thyroid</a></li>
       </ul>
     </div>
     <div>

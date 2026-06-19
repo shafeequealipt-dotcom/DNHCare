@@ -1,0 +1,21 @@
+name: Deploy Production
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.ORACLE_SSH_KEY }}" > ~/.ssh/oracle.key
+          chmod 600 ~/.ssh/oracle.key
+          ssh-keyscan -H ${{ secrets.ORACLE_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Pull main → production
+        run: |
+          ssh -i ~/.ssh/oracle.key ubuntu@${{ secrets.ORACLE_HOST }} \
+            'git -C ~/DNHCare fetch origin && git -C ~/DNHCare reset --hard origin/main'

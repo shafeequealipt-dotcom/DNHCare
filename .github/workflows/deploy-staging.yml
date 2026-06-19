@@ -1,0 +1,21 @@
+name: Deploy Staging
+
+on:
+  push:
+    branches: [development]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.ORACLE_SSH_KEY }}" > ~/.ssh/oracle.key
+          chmod 600 ~/.ssh/oracle.key
+          ssh-keyscan -H ${{ secrets.ORACLE_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Pull development → staging
+        run: |
+          ssh -i ~/.ssh/oracle.key ubuntu@${{ secrets.ORACLE_HOST }} \
+            'git -C ~/DNHCare-staging fetch origin && git -C ~/DNHCare-staging reset --hard origin/development'
