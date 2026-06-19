@@ -62,6 +62,42 @@ def discard(slug):
         os.remove(path)
 
 
+def _insert_schema_entry(post):
+    """Prepend new post into Blog.blogPost + ItemList in blog/index.html, keeping
+    positions sequential and numberOfItems accurate."""
+    import json as _json
+    idx = os.path.join(config.BLOG_DIR, "index.html")
+    html = open(idx, encoding="utf-8").read()
+    slug = post.slug
+    title_json = _json.dumps(post.title)
+    url = f"https://dnhcare.co.in/blog/{slug}.html"
+
+    # 1. Prepend into Blog.blogPost array (newest first)
+    bp_entry = (f'\n      {{"@type": "BlogPosting", "@id": "{url}#post", '
+                f'"headline": {title_json}, "url": "{url}"}},')
+    html = html.replace('"blogPost": [', '"blogPost": [' + bp_entry, 1)
+
+    # 2. Update ItemList: increment numberOfItems, shift existing positions, prepend ListItem
+    html = re.sub(r'"numberOfItems":\s*(\d+)',
+                  lambda m: f'"numberOfItems": {int(m.group(1)) + 1}', html, count=1)
+    # Shift existing positions upward before inserting position 1
+    def _bump(m):
+        return f'"position": {int(m.group(1)) + 1}'
+    # Only bump positions inside the ItemList block (after the ItemList marker)
+    il_start = html.find('"itemListElement": [')
+    if il_start != -1:
+        before = html[:il_start]
+        after = html[il_start:]
+        after = re.sub(r'"position":\s*(\d+)', _bump, after)
+        html = before + after
+    li_entry = (f'\n      {{"@type": "ListItem", "position": 1, '
+                f'"url": "{url}", "name": {title_json}}},')
+    html = html.replace('"itemListElement": [', '"itemListElement": [' + li_entry, 1)
+
+    with open(idx, "w", encoding="utf-8") as f:
+        f.write(html)
+
+
 def _insert_index_card(post):
     idx = os.path.join(config.BLOG_DIR, "index.html")
     html = open(idx, encoding="utf-8").read()
@@ -117,6 +153,7 @@ def publish(post, html_str, topic):
     sync_main()                       # ensure fast-forward + clean base
     stage_draft(post.slug, html_str)  # re-write the post (sync may have cleaned it)
     _insert_index_card(post)
+    _insert_schema_entry(post)
     _insert_sitemap(post.slug)
     topics.mark_done(topic, post.slug)
 

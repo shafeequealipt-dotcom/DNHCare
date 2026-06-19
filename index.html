@@ -13,6 +13,7 @@
   <link rel="preload" as="image" href="frames/hero/frame_0001.jpg" fetchpriority="high" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,500&family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="styles.css?v=2" />
   <script type="application/ld+json">
   {
@@ -23,8 +24,12 @@
     "alternateName": "DNH Care",
     "url": "https://dnhcare.co.in/",
     "image": "https://framerusercontent.com/images/JTKXKkgWOsaoOPLXt5mENvvSIPA.png",
+    "logo": { "@type": "ImageObject", "url": "https://dnhcare.co.in/favicon.svg" },
     "telephone": "+91-9663779358",
     "medicalSpecialty": "Homeopathic",
+    "priceRange": "₹",
+    "currenciesAccepted": "INR",
+    "paymentAccepted": "Cash, UPI",
     "address": {
       "@type": "PostalAddress",
       "streetAddress": "Opp. KK School, Gunjur Main Road, Varthur",
@@ -55,13 +60,15 @@
       "https://www.instagram.com/dr.nafia.m",
       "https://www.practo.com/bangalore/clinic/dr-nafia-s-homoeopathic-medical-centre-varthur"
     ],
-    "physician": {
-      "@type": "Physician",
-      "name": "Dr. Nafia M",
-      "medicalSpecialty": "Homeopathic",
-      "alumniOf": "Vinayaka Mission University",
-      "worksFor": { "@id": "https://dnhcare.co.in/#clinic" }
-    }
+    "founder": { "@id": "https://dnhcare.co.in/#doctor" },
+    "physician": { "@id": "https://dnhcare.co.in/#doctor" },
+    "availableService": [
+      { "@type": "MedicalTherapy", "name": "Homoeopathic Skin Treatment", "url": "https://dnhcare.co.in/skin-treatment.html" },
+      { "@type": "MedicalTherapy", "name": "Homoeopathic Allergy and Sinusitis Care", "url": "https://dnhcare.co.in/allergy-treatment.html" },
+      { "@type": "MedicalTherapy", "name": "Homoeopathic Pediatric Care", "url": "https://dnhcare.co.in/pediatric-care.html" },
+      { "@type": "MedicalTherapy", "name": "Homoeopathic Migraine and Headache Care", "url": "https://dnhcare.co.in/migraine-treatment.html" },
+      { "@type": "MedicalTherapy", "name": "Homoeopathic Women's Health and Thyroid Support", "url": "https://dnhcare.co.in/womens-health.html" }
+    ]
   }
   </script>
   <script type="application/ld+json">
@@ -80,6 +87,47 @@
       { "@type": "Question", "name": "Where is the clinic located and how do I book?",
         "acceptedAnswer": { "@type": "Answer", "text": "We are opposite KK School on Gunjur Main Road, Varthur, Bengaluru 560087. Book online via the website, call +91 96637 79358, or message us on WhatsApp." } }
     ]
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "@id": "https://dnhcare.co.in/#website",
+    "url": "https://dnhcare.co.in/",
+    "name": "DNH Care – Dr. Nafia's Homoeopathic Medical Centre",
+    "description": "Homeopathic clinic in Varthur, Bengaluru offering individualised care for skin, allergies, pediatric, migraine and women's health concerns.",
+    "inLanguage": "en",
+    "publisher": { "@id": "https://dnhcare.co.in/#clinic" },
+    "hasPart": { "@id": "https://dnhcare.co.in/blog/#blog" }
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": ["Person", "Physician"],
+    "@id": "https://dnhcare.co.in/#doctor",
+    "name": "Dr. Nafia M",
+    "honorificPrefix": "Dr.",
+    "honorificSuffix": "BHMS",
+    "jobTitle": "Homeopathic Physician",
+    "description": "Homeopathic physician (BHMS, Vinayaka Mission University) with a PG Diploma in Counseling and Family Therapy. Leads Dr. Nafia's Homoeopathic Medical Centre in Varthur, Bengaluru — 5,100+ patients, 4.9 ★ Google rating.",
+    "hasCredential": [
+      {
+        "@type": "EducationalOccupationalCredential",
+        "credentialCategory": "degree",
+        "name": "Bachelor of Homoeopathic Medicine and Surgery (BHMS)",
+        "recognizedBy": { "@type": "Organization", "name": "Vinayaka Mission University" }
+      },
+      {
+        "@type": "EducationalOccupationalCredential",
+        "credentialCategory": "postgraduate",
+        "name": "PG Diploma in Counseling and Family Therapy"
+      }
+    ],
+    "medicalSpecialty": "Homeopathic",
+    "worksFor": { "@id": "https://dnhcare.co.in/#clinic" },
+    "sameAs": ["https://www.instagram.com/dr.nafia.m"]
   }
   </script>
 </head>
