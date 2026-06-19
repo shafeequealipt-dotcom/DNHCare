@@ -12,7 +12,7 @@ READ THIS FILE ALONE = KNOW EVERYTHING. PUSH TO GITHUB. DONE.
     host = ubuntu@140.245.230.251 (Ubuntu 22.04). ssh key (local) = ~/.ssh/oracle.key.
     venv = /home/ubuntu/dnhvenv ; secrets = /home/ubuntu/DNHCare/agent/bot/.env (chmod 600).
     service = dnhcare-bot (systemd, enabled=survives reboot). manage: `sudo systemctl {status|restart|stop} dnhcare-bot` ; logs `journalctl -u dnhcare-bot -f`.
-    config: PUBLISH_BRANCH=development, POST_TIME=06:00 IST, model=openai/gpt-oss-120b:free, token=DNH_Github_Token (fine-grained PAT, Contents:R/W).
+    config: PUBLISH_BRANCH=main, POST_TIME=06:00 IST, model=openai/gpt-oss-120b:free, token=DNH_Github_Token (fine-grained PAT, Contents:R/W).
 - LOCAL bot = STOPPED (Oracle is the only instance). RUN ONLY ONE BOT (same Telegram token -> 409).
 - GOTCHA hit during deploy: fine-grained PAT needs **Contents: Read AND write** + the repo selected under "Only select repositories".
 
@@ -25,9 +25,9 @@ AUTO-DEPLOY via GitHub Actions (secrets: ORACLE_SSH_KEY, ORACLE_HOST):
   push to development -> .github/workflows/deploy-staging.yml    -> ssh pulls ~/DNHCare-staging
   push/merge to main  -> .github/workflows/deploy-production.yml -> ssh pulls ~/DNHCare
 
-BOT FLOW (2026-06-19 change):
-  bot generates post -> pushes to development -> staging auto-deploys -> user reviews on staging.dnhcare.co.in
-  -> user merges dev->main on GitHub -> production auto-deploys -> dnhcare.co.in live
+BOT FLOW (2026-06-19):
+  bot generates post -> Approve in Telegram -> pushes to main -> deploy-production.yml -> dnhcare.co.in live in ~15s
+  staging.dnhcare.co.in = used for manual dev/design changes (push to development branch)
 
 NGINX on Oracle (already installed + active):
   /etc/nginx/sites-enabled/dnhcare.co.in         -> serves ~/DNHCare (clean URLs: /blog/my-post)
