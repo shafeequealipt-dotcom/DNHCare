@@ -214,6 +214,11 @@ H. Deploy live (Netlify/Vercel/Cloudflare Pages) w/ clean URLs + real domain swa
 I. Web vitals / analytics (GA4 or Plausible) + Search Console wiring.
 J. Service schema per treatment page — DONE (MedicalTherapy + MedicalWebPage + FAQPage on all 5 service pages, 2026-06-19).
 
+## DEPLOYMENT RULES (MANDATORY — NO EXCEPTIONS)
+- BEFORE pushing to main or Oracle: test the full affected flow end-to-end. For bot changes: verify token auth (curl 200), dry-run git push, restart service and confirm `active (running)`. For site changes: run check_post.py on representative posts. Never deploy untested code.
+- Oracle SSH key = /Users/naash/Documents/Projects/Personal-2/Orcale/ssh-key-2026-05-25 (1).key  host = ubuntu@140.245.230.251
+- ALWAYS confirm with user before any push to main or any Oracle operation. Ask explicitly and wait for "yes".
+
 ## RULES / GOTCHAS
 - SEO = FIRST objective. every change must not hurt crawlability or page speed.
 - NO medical overclaims. no "cure", "guaranteed", "no side effects". YMYL health rules.
