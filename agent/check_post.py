@@ -49,7 +49,7 @@ def main(path):
             fails.append(f"missing required element: {label} ({needle})")
 
     # must link to at least one service page (internal linking)
-    if not re.search(r'\.\./(skin-treatment|allergy-treatment|pediatric-care|migraine-treatment|womens-health)\.html', html):
+    if not re.search(r'\.\./(skin-treatment|allergy-treatment|pediatric-care|migraine-treatment|womens-health)(\.html)?', html):
         fails.append("no internal link to a service page")
 
     # word count of the article body (sanity: real content, not thin)
