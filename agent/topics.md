@@ -10,12 +10,12 @@ Bengaluru). Keep each post original, locally useful, and tied to a service page.
 - If the queue runs low (< 5 left), add 10 fresh, non-duplicate ideas before writing.
 
 ## Queue (oldest first = next up)
-- [Women] Perimenopause: small changes that ease the transition
 - [Children] Tonsillitis that keeps coming back
 - [Allergies] Monsoon mould and the cough that won't quit
 - [Skin] Urticaria (hives): why it flares and how care approaches it
 
 ## Done (most recent first)
+- 2026-06-24 [Women] Perimenopause: small changes that ease the transition  -> perimenopause-homeopathy-varthur.html
 - 2026-06-23 [Migraine] Keeping a headache diary that actually helps your doctor  -> migraine-homeopathy-varthur-headache-diary.html
 - 2026-06-16 [Skin] Psoriasis through the seasons: a gentler routine  -> psoriasis-homeopathy-varthur.html
 - 2026-06-15 [Allergies] Pet dander, pollen, dust: finding your real trigger  -> pet-dander-allergy-treatment-varthur.html
