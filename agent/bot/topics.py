@@ -34,6 +34,26 @@ def list_queue():
     return [l.strip()[2:].strip() for l in q]
 
 
+def list_done_titles():
+    """Return the '[Category] Title' of every already-published post (newest first),
+    stripped of the leading date and trailing '-> slug.html'. Used to stop the
+    auto-picker from proposing a topic that has already been covered."""
+    _, _, done = _split(_read())
+    titles = []
+    for l in done.splitlines():
+        l = l.strip()
+        if not l.startswith("- "):
+            continue
+        body = l[2:].strip()
+        # drop leading ISO date if present
+        body = re.sub(r"^\d{4}-\d{2}-\d{2}\s+", "", body)
+        # drop trailing '-> slug.html'
+        body = re.sub(r"\s*->\s*\S+\.html\s*$", "", body)
+        if body:
+            titles.append(body.strip())
+    return titles
+
+
 def queue_count():
     return len(list_queue())
 
@@ -76,6 +96,16 @@ def autoselect_viral_topic() -> str:
     cats = " / ".join(config.CATEGORIES)
     today = datetime.date.today()
     month = today.strftime("%B")
+    # Give the model the full list of already-published topics so it never repeats one.
+    already = list_done_titles()
+    avoid_block = ""
+    if already:
+        avoid_block = (
+            "\n\nThese topics have ALREADY been published — do NOT propose any of them "
+            "again, and avoid anything that overlaps closely in subject or angle:\n"
+            + "\n".join(f"- {t}" for t in already)
+            + "\n\nPropose something genuinely NEW that is not a rewording of the above."
+        )
     resp = llm.chat(
         temperature=0.8,
         max_tokens=200,
@@ -88,8 +118,9 @@ def autoselect_viral_topic() -> str:
                 "current season, typical weather, and health concerns common at this "
                 "time of year, propose ONE blog topic that is timely, highly "
                 "shareable, and genuinely useful. It MUST map to one of the categories "
-                "and stay within safe, non-overclaiming homeopathy content.\n\n"
-                "Reply with EXACTLY one line and nothing else, in this format:\n"
+                "and stay within safe, non-overclaiming homeopathy content."
+                + avoid_block
+                + "\n\nReply with EXACTLY one line and nothing else, in this format:\n"
                 "[Category] Title of the post"
             ),
         }],

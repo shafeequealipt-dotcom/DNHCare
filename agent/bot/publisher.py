@@ -62,6 +62,17 @@ def discard(slug):
         os.remove(path)
 
 
+def slug_is_published(slug: str) -> bool:
+    """True if a post with this slug is ALREADY committed to git (i.e. a real,
+    live duplicate). Checks git-tracked files — not the working tree — so an
+    in-flight draft or a gate-retry re-write of the same slug is NOT flagged."""
+    rel = os.path.relpath(os.path.join(config.BLOG_DIR, f"{slug}.html"),
+                          config.REPO_DIR)
+    p = subprocess.run(["git", "ls-files", "--error-unmatch", rel],
+                       cwd=config.REPO_DIR, capture_output=True, text=True)
+    return p.returncode == 0
+
+
 def _insert_schema_entry(post):
     """Prepend new post into Blog.blogPost + ItemList in blog/index.html, keeping
     positions sequential and numberOfItems accurate."""

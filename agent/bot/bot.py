@@ -55,6 +55,14 @@ def _generate_blocking(topic: str | None, feedback: str = ""):
             topics.add_topic(topic)
             auto_note = topic
     post = content.generate_post(topic, feedback)
+    # Guard: never overwrite a live post. If this slug is already published, it's a
+    # duplicate — surface it instead of silently clobbering the existing article.
+    if publisher.slug_is_published(post.slug):
+        raise RuntimeError(
+            f"duplicate: a post with slug '{post.slug}' is already published "
+            f"(blog/{post.slug}.html). Topic was: {topic}. Send /generate to try a "
+            f"fresh topic, or /addtopic a new angle."
+        )
     recent = publisher.recent_posts(2)
     html = content.render_html(post, recent)
     path = publisher.stage_draft(post.slug, html)
