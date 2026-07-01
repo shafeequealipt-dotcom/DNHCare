@@ -5,8 +5,17 @@ READ THIS FILE ALONE = KNOW EVERYTHING. PUSH TO GITHUB. DONE.
 
 ---
 
-## STATUS (2026-06-19) — LIVE + STAGING/PROD PIPELINE ACTIVE
-- SITE IS LIVE at dnhcare.co.in (GitHub Pages, main branch). DNS cutover to Oracle pending (user action).
+## STATUS (2026-07-02) — LIVE ON ORACLE, BOT PUBLISHING TO MAIN
+- SITE IS LIVE at dnhcare.co.in (served from Oracle Nginx, main branch, clean URLs).
+- 2026-07-02 FIXES (all live on main + Oracle):
+    * check_post.py: clean-URL service-link regex (was requiring .html — rejected every post).
+    * check_post.py: NEW remedy-name gate (BANNED_REMEDY_NAMES) — blocks Belladonna, Hepar sulph,
+      Pulsatilla, etc. from patient-facing prose. content_prompt.txt also forbids naming remedies.
+      Cleaned 10 old posts that had listed remedy names.
+    * daily agent: duplicate-post prevention (topic memory + slug guard) — see DAILY AGENT below.
+- ORACLE bot GITHUB TOKEN ROTATED 2026-07-02: old DNH_Github_Token had expired (push 401).
+  New fine-grained PAT is in /home/ubuntu/DNHCare/agent/bot/.env (Contents:R/W). Bot restarted.
+  DEPLOY RULE: test token auth + dry-run push BEFORE deploying bot changes (see DEPLOYMENT RULES).
 - BACKUP of old main = branch `backup-main-20260614` (commit df23bf7). rollback = `git push -f origin backup-main-20260614:main`.
 - ORACLE DEPLOY = DONE (2026-06-14). bot runs 24/7 on the Oracle VM as a systemd service.
     host = ubuntu@140.245.230.251 (Ubuntu 22.04). ssh key (local) = ~/.ssh/oracle.key.
@@ -117,6 +126,18 @@ trick = canvas image-sequence scrub.
                    Approve/Reject buttons; Reject->reply feedback->regenerate.
     check_post.py (in /agent/) = the deterministic gate, run on every draft before it's shown.
     deploy/dnhcare-bot.service + SETUP-ORACLE.md = systemd unit + full Oracle deploy guide.
+- CHECK_POST GATE (agent/check_post.py) blocks a draft if ANY of:
+    banned overclaim word (cure/guaranteed/miracle/no side effects/...); specific homeopathic
+    REMEDY NAME (Belladonna, Hepar sulph, Pulsatilla + 30 more — never name remedies in prose);
+    missing required element (med-disclaimer, author-box, BlogPosting/BreadcrumbList schema,
+    canonical, scroll-progress, footer NAP, WhatsApp CTA); no internal service-page link
+    (clean URL, no .html); body < 380 words; missing/too-short title or meta description.
+- DUPLICATE-POST PREVENTION (added 2026-07-02):
+    1. topics.autoselect_viral_topic() feeds the whole "Done" list into the LLM prompt
+       ("do NOT propose any of these again") — no repeat topics when the queue is empty.
+    2. publisher.slug_is_published() + guard in bot._generate_blocking(): a draft whose slug
+       is already committed to git is REJECTED (Telegram message), never overwrites a live post.
+       Checks git-tracked files, so gate-retries of the in-flight draft are not false-flagged.
 - SECRETS:
     Telegram = SYSTEM env vars DNH_Telegram_Token + DNH_Telegram_ID (already set on user's Windows machine; export on the VM).
     OPENROUTER_API_KEY = system env (already set) or .env.
@@ -222,6 +243,9 @@ J. Service schema per treatment page — DONE (MedicalTherapy + MedicalWebPage +
 ## RULES / GOTCHAS
 - SEO = FIRST objective. every change must not hurt crawlability or page speed.
 - NO medical overclaims. no "cure", "guaranteed", "no side effects". YMYL health rules.
+- NEVER name specific homeopathic remedies (Belladonna, Pulsatilla, etc.) in blog prose —
+  looks like prescribing = YMYL/regulatory risk. check_post.py enforces this. Say
+  "an individually selected remedy" instead.
 - keep frames ~180, 1600px, q88. more/bigger = slow = bad SEO.
 - continuous-motion clips only (no hard cuts — ugly scrubbed backward).
 - v2 redesign = APPROVED and merged. it IS the live version now. no v2 files anymore.

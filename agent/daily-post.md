@@ -19,7 +19,7 @@ Read `CAVEMAN.md` first for all brand facts, then follow these steps exactly.
    structural template — it already has nav, schema blocks, scroll bar, footer, action bar.
    Create `blog/<slug>.html` (slug = short, hyphenated, keyword-bearing, .html). Then fill in:
    - `<title>` (≤ 60 chars, end with "| DNH Care Journal"), meta description (140–158 chars).
-   - canonical + og:url = `https://dnhcare.co.in/blog/<slug>.html`.
+   - canonical + og:url = `https://dnhcare.co.in/blog/<slug>` (CLEAN URL, no .html — Nginx serves it).
    - BlogPosting schema: headline, datePublished + dateModified = today, articleSection = category,
      author Dr. Nafia M, publisher clinic @id. BreadcrumbList: Home › Journal › title.
    - article-hero: breadcrumb, `.post-cat-tag` (the category), `<h1>`, `.post-meta` (By Dr. Nafia M · date · N min read).
@@ -32,12 +32,15 @@ Read `CAVEMAN.md` first for all brand facts, then follow these steps exactly.
 4. **Tone + safety (non-negotiable, YMYL):**
    - NEVER use: cure, guaranteed, "no side effects", "100% safe", miracle, "permanent cure",
      "instant relief", risk-free. No promises of outcomes. No diagnosing the reader.
+   - NEVER name specific homeopathic remedies (Belladonna, Hepar sulph, Pulsatilla, Nux vomica,
+     Arsenicum, etc.). Listing remedies = prescribing = rejected by the gate. Say
+     "an individually selected remedy" / "treatment tailored to your symptom pattern" instead.
    - Always: "individualized", "may", "supports", "reviewed over time", realistic expectations.
    - Include the red-flag / see-a-doctor note inside `.med-disclaimer` where relevant.
 
 5. **Wire it in:**
    - Add a `<a class="post-card">` to `blog/index.html` inside `#posts` as the NEWEST (first) card.
-   - Add `<loc>https://dnhcare.co.in/blog/<slug>.html</loc>` to `sitemap.xml`.
+   - Add `<loc>https://dnhcare.co.in/blog/<slug></loc>` to `sitemap.xml` (clean URL, no .html).
    - Move the topic to "Done" (with date + filename) in `agent/topics.md`. If queue < 5 left, add 10 new ideas.
 
 6. **GATE — must pass before PR:**
