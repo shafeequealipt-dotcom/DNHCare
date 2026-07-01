@@ -22,5 +22,11 @@ across 3-4 sections. Original every time; never reuse another post's angle.
 MEDICAL / YMYL SAFETY (mandatory — violations are rejected):
 - NEVER use: cure, cures, guaranteed, "no side effects", "100% safe", miracle,
   "permanent cure", "instant relief", risk-free. No promises of outcomes. Don't diagnose.
+- NEVER name specific homeopathic remedies or medicines (e.g. Belladonna, Hepar sulphur,
+  Phytolacca, Nux vomica, Pulsatilla, Arsenicum, Bryonia, or any other remedy name).
+  This is a patient-education blog, not a prescribing reference. Remedy selection is
+  always individualised by the doctor in person — listing names implies prescribing and
+  creates regulatory and YMYL risk. Say "an individually selected remedy" or
+  "homeopathic treatment tailored to your child's symptom pattern" instead.
 - Use measured language: "individualized", "may", "supports", "reviewed over time".
 - category MUST be exactly one of: {categories}.

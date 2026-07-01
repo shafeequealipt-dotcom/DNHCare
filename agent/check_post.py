@@ -15,6 +15,17 @@ BANNED = [
     "permanent cure", "instant relief", "risk-free", "proven to cure",
 ]
 
+# Specific homeopathic remedy/medicine names must never appear in patient-facing posts.
+# Naming remedies looks like prescribing — a YMYL/regulatory risk and not the clinic's style.
+BANNED_REMEDY_NAMES = [
+    "belladonna", "hepar sulphur", "hepar sulph", "phytolacca", "kali bichromicum",
+    "kali bich", "arsenicum", "pulsatilla", "nux vomica", "bryonia", "rhus tox",
+    "sulphur", "calcarea", "lycopodium", "natrum mur", "sepia", "ignatia",
+    "apis mellifica", "apis mel", "silicea", "phosphorus", "thuja", "lachesis",
+    "mercurius", "gelsemium", "aconite", "aconitum", "graphites", "conium",
+    "hypericum", "arnica", "ledum", "ruta", "staphysagria", "china officinalis",
+]
+
 REQUIRED_SUBSTRINGS = {
     "medical disclaimer block": 'class="med-disclaimer"',
     "author E-E-A-T box": 'class="author-box"',
@@ -43,6 +54,10 @@ def main(path):
     for word in BANNED:
         if re.search(r"\b" + re.escape(word) + r"\b", text):
             fails.append(f"banned overclaim word present: '{word}'")
+
+    for remedy in BANNED_REMEDY_NAMES:
+        if re.search(r"\b" + re.escape(remedy) + r"\b", text):
+            fails.append(f"specific remedy name must not appear in patient-facing content: '{remedy}'")
 
     for label, needle in REQUIRED_SUBSTRINGS.items():
         if needle not in html:
