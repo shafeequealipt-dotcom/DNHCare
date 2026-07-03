@@ -13,6 +13,7 @@ Bengaluru). Keep each post original, locally useful, and tied to a service page.
 
 
 ## Done (most recent first)
+- 2026-07-03 [Skin] How to soothe and prevent heat rash and prickly heat during Bengaluru’s peak monsoon humidity  -> heat-rash-treatment-varthur.html
 - 2026-07-01 [Skin] Urticaria (hives): why it flares and how care approaches it  -> urticaria-treatment-varthur.html
 - 2026-06-30 [Allergies] Monsoon mould and the cough that won't quit  -> monsoon-mould-cough-treatment-varthur.html
 - 2026-06-29 [Children] Tonsillitis that keeps coming back  -> recurrent-tonsillitis-treatment-varthur.html
