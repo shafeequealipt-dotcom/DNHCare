@@ -41,6 +41,15 @@ PRESET_MODELS = [
 ]
 DEFAULT_MODEL = _env("DEFAULT_MODEL", default=PRESET_MODELS[0])
 
+# ---- Google Business Profile local posts (ALL optional — feature stays dormant
+#      until every var is set in .env; see agent/bot/gbp_auth.py for the one-time
+#      OAuth bootstrap that produces the refresh token + IDs) ----
+GBP_CLIENT_ID = _env("GBP_CLIENT_ID")
+GBP_CLIENT_SECRET = _env("GBP_CLIENT_SECRET")
+GBP_REFRESH_TOKEN = _env("GBP_REFRESH_TOKEN")
+GBP_ACCOUNT_ID = _env("GBP_ACCOUNT_ID")      # numeric id from accounts/{id}
+GBP_LOCATION_ID = _env("GBP_LOCATION_ID")    # numeric id from locations/{id}
+
 # ---- GitHub publish target (token from env — set DNH_Github_Token or GITHUB_TOKEN) ----
 GITHUB_TOKEN = _env("DNH_Github_Token", "DNH_GITHUB_TOKEN", "GITHUB_TOKEN", required=True)
 GITHUB_REPO = _env("GITHUB_REPO", default="shafeequealipt-dotcom/DNHCare")
@@ -108,6 +117,19 @@ def set_model_menu(ids: list) -> list:
 
 def get_model_menu() -> list:
     return _read_state().get("model_menu", [])
+
+
+# ---- Google Business Profile toggle (runtime /gbp on|off, persisted) ----
+def gbp_enabled() -> bool:
+    return bool(_read_state().get("gbp_enabled", True))  # default ON once configured
+
+
+def set_gbp_enabled(on: bool) -> bool:
+    state = _read_state()
+    state["gbp_enabled"] = bool(on)
+    with open(STATE_FILE, "w", encoding="utf-8") as f:
+        json.dump(state, f)
+    return state["gbp_enabled"]
 
 
 # ---- daily post time (switchable from Telegram), persisted ----

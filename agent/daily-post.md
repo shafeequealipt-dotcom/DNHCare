@@ -53,6 +53,13 @@ Read `CAVEMAN.md` first for all brand facts, then follow these steps exactly.
    - `gh pr create --base main --head post/YYYY-MM-DD --title "Blog: <post title>" --body "Daily draft for review. Safety check passed. Category: <cat>. Word count: <n>."`
    - Report the PR URL. STOP. A human reviews and merges (merge = auto-deploy to dnhcare.co.in).
 
+## GOOGLE BUSINESS PROFILE (bot feature — when configured)
+- The Telegram bot also writes a `gbp_summary` (2-4 warm plain-text sentences,
+  <=1200 chars) for the clinic's Google Business Profile local post.
+- Same YMYL rules apply to it: no overclaims, NO remedy names, no hashtags/markdown.
+- On Approve, the bot publishes the blog first, then the GBP post (Learn-more link
+  to the clean blog URL). A GBP failure never blocks the blog. Toggle: /gbp on|off.
+
 ## DO NOT
 - Do not merge your own PR or push to `main`.
 - Do not touch the cinematic frames, engine, or service-page medical copy.

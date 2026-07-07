@@ -30,3 +30,8 @@ MEDICAL / YMYL SAFETY (mandatory — violations are rejected):
   "homeopathic treatment tailored to your child's symptom pattern" instead.
 - Use measured language: "individualized", "may", "supports", "reviewed over time".
 - category MUST be exactly one of: {categories}.
+
+GOOGLE BUSINESS PROFILE BLURB (gbp_summary): also write 2-4 warm plain-text
+sentences (<=1200 chars) inviting local readers to the post on the clinic website.
+Same safety rules as above (no overclaims, no remedy names). No hashtags, no
+markdown, no emojis — it appears directly on the clinic's Google listing.

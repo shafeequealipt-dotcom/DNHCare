@@ -12,7 +12,7 @@ from telegram.constants import ParseMode
 from telegram.ext import (Application, CommandHandler, CallbackQueryHandler,
                           MessageHandler, ContextTypes, filters)
 
-from . import config, content, publisher, topics
+from . import config, content, gbp, publisher, topics
 
 logging.basicConfig(level=logging.INFO,
                     format="%(asctime)s %(levelname)s %(name)s: %(message)s")
@@ -116,6 +116,7 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "/model – show the current writing model\n"
         "/models – list all live free models, numbered\n"
         "/setmodel <number> – switch to a model by its number from /models\n"
+        "/gbp – Google Business Profile auto-post status; /gbp on | off\n"
         "/time – show the daily post time\n"
         "/settime HH:MM – set the daily post time (IST)\n"
         "/prompt – show the content-generation prompt\n"
@@ -250,6 +251,26 @@ async def cmd_setmodel(update: Update, context: ContextTypes.DEFAULT_TYPE):
                                     parse_mode=ParseMode.HTML)
 
 
+async def cmd_gbp(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not _only_owner(update):
+        return
+    arg = (" ".join(context.args)).strip().lower()
+    if arg in ("on", "off"):
+        config.set_gbp_enabled(arg == "on")
+    if not gbp.is_configured():
+        await update.message.reply_text(
+            "Google Business Profile is NOT configured yet — the bot publishes the "
+            "blog only.\nSetup: add GBP_CLIENT_ID/SECRET to agent/bot/.env, then run "
+            "`python3 -m agent.bot.gbp_auth login` and `… discover` on the VM and add "
+            "the printed values. See agent/bot/gbp_auth.py.")
+        return
+    state = "ON ✅" if config.gbp_enabled() else "OFF ⏸"
+    await update.message.reply_text(
+        f"Google Business Profile auto-post is {state}.\n"
+        "On ✅ Approve, the blog is published AND shared to the clinic's Google "
+        "listing with a Learn-more link.\nToggle with /gbp on or /gbp off.")
+
+
 async def cmd_generate(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not _only_owner(update):
         return
@@ -304,10 +325,27 @@ async def on_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
             log.exception("publish failed")
             await context.bot.send_message(config.TELEGRAM_CHAT_ID, f"⚠️ Publish failed: {e}")
             return
+        post = PENDING["post"]
         PENDING.clear()
         await context.bot.send_message(
             config.TELEGRAM_CHAT_ID,
             f"✅ Published — live in ~1–2 min:\n{url}")
+        # Also share on the clinic's Google Business Profile (isolated: a GBP
+        # failure never affects the already-published blog post).
+        if gbp.is_enabled():
+            clean_url = f"https://dnhcare.co.in/blog/{post.slug}"
+            try:
+                await asyncio.to_thread(gbp.create_local_post,
+                                        content.gbp_blurb(post), clean_url)
+                await context.bot.send_message(
+                    config.TELEGRAM_CHAT_ID,
+                    "📍 Also posted to the clinic's Google Business Profile.")
+            except Exception as e:  # noqa
+                log.exception("GBP post failed")
+                await context.bot.send_message(
+                    config.TELEGRAM_CHAT_ID,
+                    f"⚠️ Blog is live, but the Google Business Profile post "
+                    f"failed: {e}\n(/gbp off silences this until fixed.)")
     elif q.data == "reject":
         PENDING["awaiting_feedback"] = True
         await q.edit_message_reply_markup(reply_markup=None)
@@ -341,6 +379,7 @@ def main():
     app.add_handler(CommandHandler("model", cmd_model))
     app.add_handler(CommandHandler("models", cmd_models))
     app.add_handler(CommandHandler("setmodel", cmd_setmodel))
+    app.add_handler(CommandHandler("gbp", cmd_gbp))
     app.add_handler(CommandHandler("time", cmd_time))
     app.add_handler(CommandHandler("settime", cmd_settime))
     app.add_handler(CommandHandler("prompt", cmd_prompt))

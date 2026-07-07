@@ -132,6 +132,22 @@ trick = canvas image-sequence scrub.
     missing required element (med-disclaimer, author-box, BlogPosting/BreadcrumbList schema,
     canonical, scroll-progress, footer NAP, WhatsApp CTA); no internal service-page link
     (clean URL, no .html); body < 380 words; missing/too-short title or meta description.
+- GOOGLE BUSINESS PROFILE AUTO-POST (built 2026-07-07, Phase 1 = code only, DORMANT):
+    on ✅ Approve, after the blog publishes, bot ALSO creates a GBP local post
+    (STANDARD + Learn-more CTA -> clean blog URL). GBP failure never blocks the blog.
+    CODE: agent/bot/gbp.py (token refresh + create/delete local post, stdlib urllib);
+          agent/bot/gbp_auth.py (one-time OAuth: `login` mints refresh token,
+          `discover` lists account/location ids); content.py Post.gbp_summary +
+          gbp_blurb() fallback chain (summary -> lede -> title+meta) with the same
+          banned-words + remedy-names scan as the gate; /gbp on|off|status in Telegram.
+    DORMANT until ALL 5 env vars in agent/bot/.env: GBP_CLIENT_ID, GBP_CLIENT_SECRET,
+          GBP_REFRESH_TOKEN, GBP_ACCOUNT_ID, GBP_LOCATION_ID (see .env.example).
+    USER MUST DO (Phase 2): (a) request GBP API quota access (default quota = 0!)
+          https://developers.google.com/my-business/content/prereqs
+          (b) create OAuth client (Desktop app) -> give client id+secret.
+    THEN (Phase 3): run gbp_auth login+discover on VM, fill .env, live test
+          (create + delete a post), deploy. GBP = OAuth refresh-token only,
+          NO service accounts. LocalPost.summary limit = 1500 chars.
 - DUPLICATE-POST PREVENTION (added 2026-07-02):
     1. topics.autoselect_viral_topic() feeds the whole "Done" list into the LLM prompt
        ("do NOT propose any of these again") — no repeat topics when the queue is empty.

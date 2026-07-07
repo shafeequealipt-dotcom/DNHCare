@@ -32,6 +32,9 @@ class Post(BaseModel):
     lede: str
     sections: List[Section]
     faqs: List[FAQ]
+    # Short plain-text blurb for the Google Business Profile local post.
+    # Optional — gbp_blurb() falls back to lede/meta_description when absent.
+    gbp_summary: str = ""
 
 
 _SCHEMA = """{
@@ -44,7 +47,8 @@ _SCHEMA = """{
   "keywords": ["4-6 related / long-tail / local secondary keywords"],
   "lede": "opening paragraph; use the focus keyword within the first sentence or two",
   "sections": [{"heading": "descriptive keyword-aware H2", "paragraphs": ["..."], "bullets": ["...optional..."]}],
-  "faqs": [{"question": "string", "answer": "string"}]
+  "faqs": [{"question": "string", "answer": "string"}],
+  "gbp_summary": "2-4 warm, plain-text sentences (<=1200 chars) inviting locals to read the post on the clinic website; same YMYL safety rules; no remedy names, no hashtags, no markdown"
 }"""
 
 # Fallback used only if agent/content_prompt.txt is missing. The live, editable prompt
@@ -121,6 +125,27 @@ def generate_post(topic: str, feedback: str = "") -> Post:
                              "That was not valid JSON for the required shape. "
                              "Reply again with ONLY the JSON object, no fences."})
     raise RuntimeError(f"model did not return valid post JSON: {last_err}")
+
+
+def gbp_blurb(post: Post) -> str:
+    """Plain-text blurb for the Google Business Profile post, with fallback when
+    the model omitted gbp_summary. Runs the same YMYL safety scan as the blog
+    gate (banned overclaims + remedy names); a safety hit falls back to the
+    meta description, which is already gate-checked inside the post HTML."""
+    from .. import check_post  # agent/ is a namespace package (no __init__.py needed)
+    candidates = [post.gbp_summary,
+                  f"{post.lede}",
+                  f"{post.title} — {post.meta_description}"]
+    for text in candidates:
+        text = (text or "").strip()
+        if not text:
+            continue
+        low = " " + re.sub(r"\s+", " ", text.lower()) + " "
+        bad = any(re.search(r"\b" + re.escape(w) + r"\b", low)
+                  for w in check_post.BANNED + check_post.BANNED_REMEDY_NAMES)
+        if not bad:
+            return text
+    return f"New on the DNH Care journal: {post.title}."
 
 
 def _esc(s: str) -> str:
