@@ -6,6 +6,7 @@ import json
 import html
 import datetime
 from typing import List
+import openai
 from pydantic import BaseModel, Field, ValidationError
 from . import config, llm
 
@@ -88,6 +89,26 @@ def _slugify(s: str) -> str:
     return s[:70] or "post"
 
 
+def _loads_lenient(s: str) -> dict:
+    """json.loads with a best-effort repair pass for the JSON mistakes free models
+    make most often: trailing commas, and MISSING commas between adjacent tokens
+    separated by a newline (the "Expecting ',' delimiter" failure). Each inserted
+    comma is only between two complete tokens, where a comma is always required in
+    valid JSON — so the repair never changes meaning. Still raises if unrepairable,
+    which lets generate_post fall back to a model retry."""
+    try:
+        return json.loads(s)
+    except json.JSONDecodeError:
+        pass
+    fixed = re.sub(r",(\s*[}\]])", r"\1", s)            # drop trailing commas
+    fixed = re.sub(r"}(\s*\n\s*)\{", r"},\1{", fixed)   # }{  -> },{
+    fixed = re.sub(r"](\s*\n\s*)\[", r"],\1[", fixed)   # ][  -> ],[
+    fixed = re.sub(r'"(\s*\n\s*)"', r'",\1"', fixed)     # "…" "…" -> "…","…"
+    fixed = re.sub(r'}(\s*\n\s*)"', r'},\1"', fixed)     # } "key" -> },"key"
+    fixed = re.sub(r'](\s*\n\s*)"', r'],\1"', fixed)     # ] "key" -> ],"key"
+    return json.loads(fixed)
+
+
 def _extract_json(text: str) -> dict:
     """Pull the first JSON object out of a model reply (tolerates ``` fences / prose)."""
     t = text.strip()
@@ -96,7 +117,7 @@ def _extract_json(text: str) -> dict:
     start, end = t.find("{"), t.rfind("}")
     if start == -1 or end == -1:
         raise ValueError("no JSON object in model reply")
-    return json.loads(t[start:end + 1])
+    return _loads_lenient(t[start:end + 1])
 
 
 def generate_post(topic: str, feedback: str = "") -> Post:
@@ -109,8 +130,18 @@ def generate_post(topic: str, feedback: str = "") -> Post:
     messages = [{"role": "system", "content": _load_prompt()},
                 {"role": "user", "content": ask}]
     last_err = None
-    for attempt in range(2):
-        resp = llm.chat(messages, temperature=0.6, max_tokens=4000)
+    json_mode = True   # ask the API for guaranteed-valid JSON; drop if unsupported
+    for attempt in range(3):
+        kw = {"temperature": 0.6, "max_tokens": 4000}
+        if json_mode:
+            kw["response_format"] = {"type": "json_object"}
+        try:
+            resp = llm.chat(messages, **kw)
+        except openai.BadRequestError:
+            if json_mode:                 # model doesn't support JSON mode — retry plain
+                json_mode = False
+                continue
+            raise
         raw = resp.choices[0].message.content or ""
         try:
             post = Post(**_extract_json(raw))
