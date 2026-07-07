@@ -95,6 +95,21 @@ def set_model(model_id: str):
     return state["model"]
 
 
+# ---- numbered model menu (the list last shown by /models), persisted so that
+#      /setmodel <number> maps to exactly what the user saw, even as the live
+#      free roster shifts between calls. ----
+def set_model_menu(ids: list) -> list:
+    state = _read_state()
+    state["model_menu"] = list(ids)
+    with open(STATE_FILE, "w", encoding="utf-8") as f:
+        json.dump(state, f)
+    return state["model_menu"]
+
+
+def get_model_menu() -> list:
+    return _read_state().get("model_menu", [])
+
+
 # ---- daily post time (switchable from Telegram), persisted ----
 def get_post_time() -> str:
     return _read_state().get("post_time", POST_TIME)

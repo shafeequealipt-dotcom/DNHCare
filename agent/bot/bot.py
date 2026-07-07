@@ -114,8 +114,8 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "/topics – show the topic queue\n"
         "/addtopic <topic> – add a topic to the queue\n"
         "/model – show the current writing model\n"
-        "/models – pick a model from the free presets\n"
-        "/setmodel <id> – set any OpenRouter model id\n"
+        "/models – list all live free models, numbered\n"
+        "/setmodel <number> – switch to a model by its number from /models\n"
         "/time – show the daily post time\n"
         "/settime HH:MM – set the daily post time (IST)\n"
         "/prompt – show the content-generation prompt\n"
@@ -194,24 +194,57 @@ async def cmd_model(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def cmd_models(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not _only_owner(update):
         return
+    await update.message.reply_text("Fetching the current free models from OpenRouter…")
+    try:
+        ids = await asyncio.to_thread(llm.list_free_models)
+    except Exception as e:  # noqa
+        log.exception("model list fetch failed")
+        await update.message.reply_text(
+            f"⚠️ Couldn't fetch the live list ({e}). Falling back to presets.")
+        ids = list(config.PRESET_MODELS)
+    if not ids:
+        ids = list(config.PRESET_MODELS)
+    config.set_model_menu(ids)          # persist the numbering for /setmodel <n>
     cur = config.get_model()
-    rows = []
-    for i, m in enumerate(config.PRESET_MODELS):
-        label = ("✅ " if m == cur else "") + m
-        rows.append([InlineKeyboardButton(label, callback_data=f"m:{i}")])
-    await update.message.reply_text(
-        "Pick a writing model (free presets) — or use /setmodel <id> for any other:",
-        reply_markup=InlineKeyboardMarkup(rows))
+    lines = [f"{i} - {m}" + ("  ✅ current" if m == cur else "")
+             for i, m in enumerate(ids, 1)]
+    body = "\n".join(lines)
+    tail = "\n\nSwitch with /setmodel <number> — e.g. /setmodel 3"
+    # Telegram hard-limits messages at 4096 chars; chunk if the roster is huge.
+    while body:
+        chunk, body = body[:3500], body[3500:]
+        if body:
+            cut = chunk.rfind("\n")
+            if cut > 0:
+                body, chunk = chunk[cut + 1:] + body, chunk[:cut]
+        await update.message.reply_text(
+            f"Available free models ({len(ids)}):\n\n{chunk}" + (tail if not body else ""))
 
 
 async def cmd_setmodel(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not _only_owner(update):
         return
-    mid = " ".join(context.args).strip()
-    if not mid:
+    arg = " ".join(context.args).strip()
+    if not arg:
         await update.message.reply_text(
-            "Usage: /setmodel qwen/qwen-2.5-72b-instruct:free\nOr use /models for presets.")
+            "Usage: /setmodel <number>  (run /models to see the numbered list)\n"
+            "You can also pass a full model id, e.g. /setmodel openai/gpt-oss-20b:free")
         return
+    # A bare number selects from the last /models menu; anything else is a raw model id.
+    if arg.isdigit():
+        menu = config.get_model_menu()
+        if not menu:
+            await update.message.reply_text(
+                "No model list yet — run /models first, then /setmodel <number>.")
+            return
+        n = int(arg)
+        if not (1 <= n <= len(menu)):
+            await update.message.reply_text(
+                f"Pick a number between 1 and {len(menu)} (run /models to see them).")
+            return
+        mid = menu[n - 1]
+    else:
+        mid = arg
     config.set_model(mid)
     await update.message.reply_text(f"Writing model set to:\n<code>{mid}</code>",
                                     parse_mode=ParseMode.HTML)
