@@ -13,6 +13,7 @@ Bengaluru). Keep each post original, locally useful, and tied to a service page.
 
 
 ## Done (most recent first)
+- 2026-07-07 [Skin] Seasonal skin care: a gentle homeopathic perspective  -> homeopathy-seasonal-skin-care-bengaluru-varthur.html
 - 2026-07-07 [Skin] Seasonal skin care: a gentle homeopathic perspective  -> seasonal-skin-care-homeopathy-varthur.html
 - 2026-07-06 [Children] Protecting your kids from monsoon stomach bugs: simple homeopathic tips and hygiene habits  -> monsoon-stomach-bugs-children-varthur.html
 - 2026-07-06 [Women] How Bengaluru’s monsoon humidity can affect menstrual comfort and simple homeopathic support]  -> menstrual-comfort-monsoon-bengaluru.html
