@@ -30,14 +30,21 @@ TELEGRAM_CHAT_ID = int(_env("DNH_Telegram_ID", "DNH_TELEGRAM_ID",
 OPENROUTER_API_KEY = _env("OPENROUTER_API_KEY", required=True)
 OPENROUTER_BASE_URL = _env("OPENROUTER_BASE_URL", default="https://openrouter.ai/api/v1")
 
-# Free models selectable from Telegram. /setmodel <id> accepts any OpenRouter id.
-# (OpenRouter's free roster changes over time — refresh with /models or /setmodel.)
+# Fallback list shown by /models when the LIVE roster fetch fails (e.g. quota 429).
+# The live fetch (llm.list_free_models) normally returns the full ~24; this 10-model
+# list only kicks in as a safety net. OpenRouter's free roster changes over time —
+# refresh with /models or set any id with /setmodel.
 PRESET_MODELS = [
     "openai/gpt-oss-120b:free",
-    "qwen/qwen3-next-80b-a3b-instruct:free",
-    "meta-llama/llama-3.3-70b-instruct:free",
-    "google/gemma-4-31b-it:free",
+    "openai/gpt-oss-20b:free",
     "nvidia/nemotron-3-super-120b-a12b:free",
+    "nvidia/nemotron-3-ultra-550b-a55b:free",
+    "meta-llama/llama-3.3-70b-instruct:free",
+    "qwen/qwen3-next-80b-a3b-instruct:free",
+    "google/gemma-4-31b-it:free",
+    "qwen/qwen3-coder:free",
+    "cognitivecomputations/dolphin-mistral-24b-venice-edition:free",
+    "tencent/hy3:free",
 ]
 DEFAULT_MODEL = _env("DEFAULT_MODEL", default=PRESET_MODELS[0])
 

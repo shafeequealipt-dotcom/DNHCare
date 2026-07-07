@@ -25,7 +25,7 @@ _client = OpenAI(
     base_url=config.OPENROUTER_BASE_URL,
     api_key=config.OPENROUTER_API_KEY,
     max_retries=0,
-    timeout=90,
+    timeout=300,   # 5 min per call — slow large free models (nemotron etc.) need it
     default_headers={"HTTP-Referer": "https://dnhcare.co.in",
                      "X-Title": "DNH Care Blog Agent"},
 )
