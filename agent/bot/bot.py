@@ -12,7 +12,7 @@ from telegram.constants import ParseMode
 from telegram.ext import (Application, CommandHandler, CallbackQueryHandler,
                           MessageHandler, ContextTypes, filters)
 
-from . import config, content, gbp, publisher, topics
+from . import config, content, gbp, insights, publisher, topics
 
 logging.basicConfig(level=logging.INFO,
                     format="%(asctime)s %(levelname)s %(name)s: %(message)s")
@@ -21,6 +21,9 @@ log = logging.getLogger("dnhcare-bot")
 IST = ZoneInfo("Asia/Kolkata")
 # Single in-flight draft (one clinic, one editor). {topic, post, html, awaiting_feedback}
 PENDING: dict = {}
+# Topics suggested by the last weekly GBP digest, keyed by the index shown in the
+# message so an "Add" button tap can look the text back up.
+PENDING_TOPICS: dict = {}
 
 
 def _only_owner(update: Update) -> bool:
@@ -118,6 +121,8 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "/setmodel <number> – switch to a model by its number from /models\n"
         "/gbp – Google Business Profile auto-post status; /gbp on | off; "
         "/gbp cta call | learn\n"
+        "/report – GBP weekly performance + search-keyword digest, on demand "
+        "(also sent automatically)\n"
         "/time – show the daily post time\n"
         "/settime HH:MM – set the daily post time (IST)\n"
         "/prompt – show the content-generation prompt\n"
@@ -323,6 +328,17 @@ async def on_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
         config.set_model(model)
         await q.edit_message_text(f"Writing model set to:\n{model}")
         return
+    if q.data.startswith("t:"):
+        idx = int(q.data[2:])
+        topic = PENDING_TOPICS.get(idx)
+        if not topic:
+            await context.bot.send_message(config.TELEGRAM_CHAT_ID,
+                                           "That suggestion expired — run /report again.")
+            return
+        added = topics.add_topic(topic)
+        await context.bot.send_message(config.TELEGRAM_CHAT_ID,
+                                       f"Added to the queue:\n{added}")
+        return
     if not PENDING.get("post"):
         await q.edit_message_reply_markup(reply_markup=None)
         await context.bot.send_message(config.TELEGRAM_CHAT_ID,
@@ -348,8 +364,9 @@ async def on_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if gbp.is_enabled():
             clean_url = f"https://dnhcare.co.in/blog/{post.slug}"
             try:
-                await asyncio.to_thread(gbp.create_local_post,
-                                        content.gbp_blurb(post), clean_url)
+                gbp_name = await asyncio.to_thread(
+                    gbp.create_local_post, content.gbp_blurb(post), clean_url)
+                config.record_gbp_post(post.title, gbp_name)
                 await context.bot.send_message(
                     config.TELEGRAM_CHAT_ID,
                     "📍 Also posted to the clinic's Google Business Profile.")
@@ -382,6 +399,48 @@ async def daily_job(context: ContextTypes.DEFAULT_TYPE):
     await generate_and_send(context)
 
 
+async def _send_gbp_digest(context: ContextTypes.DEFAULT_TYPE):
+    """Build and send the weekly GBP performance digest, with tap-to-add buttons
+    for any suggested topics. Isolated: any failure here never touches posting."""
+    chat_id = config.TELEGRAM_CHAT_ID
+    if not gbp.is_configured():
+        return  # silent — the feature is dormant, not an error
+    try:
+        text, suggestions = await asyncio.to_thread(insights.build_digest)
+    except Exception as e:  # noqa
+        log.exception("GBP digest failed")
+        await context.bot.send_message(chat_id, f"⚠️ Weekly GBP report failed: {e}")
+        return
+    PENDING_TOPICS.clear()
+    rows = []
+    for i, s in enumerate(suggestions, 1):
+        PENDING_TOPICS[i] = s
+        rows.append([InlineKeyboardButton(f"Add #{i} to queue", callback_data=f"t:{i}")])
+    kb = InlineKeyboardMarkup(rows) if rows else None
+    await context.bot.send_message(chat_id, text, parse_mode=ParseMode.HTML,
+                                   reply_markup=kb)
+
+
+def _schedule_weekly_report(job_queue):
+    for j in job_queue.get_jobs_by_name("weekly_gbp_report"):
+        j.schedule_removal()
+    hh, mm = (int(x) for x in config.REPORT_TIME.split(":"))
+    job_queue.run_daily(_send_gbp_digest, time=datetime.time(hh, mm, tzinfo=IST),
+                        days=(config.REPORT_DAY,), name="weekly_gbp_report")
+
+
+async def cmd_report(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not _only_owner(update):
+        return
+    if not gbp.is_configured():
+        await update.message.reply_text(
+            "Google Business Profile is not configured — no report to show. "
+            "See /gbp for setup.")
+        return
+    await update.message.reply_text("📊 Building this week's GBP report…")
+    await _send_gbp_digest(context)
+
+
 def main():
     app = Application.builder().token(config.TELEGRAM_BOT_TOKEN).build()
     app.add_handler(CommandHandler("start", cmd_start))
@@ -393,6 +452,7 @@ def main():
     app.add_handler(CommandHandler("models", cmd_models))
     app.add_handler(CommandHandler("setmodel", cmd_setmodel))
     app.add_handler(CommandHandler("gbp", cmd_gbp))
+    app.add_handler(CommandHandler("report", cmd_report))
     app.add_handler(CommandHandler("time", cmd_time))
     app.add_handler(CommandHandler("settime", cmd_settime))
     app.add_handler(CommandHandler("prompt", cmd_prompt))
@@ -401,6 +461,8 @@ def main():
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, on_text))
 
     val = _schedule_daily(app.job_queue)
+    if gbp.is_configured():
+        _schedule_weekly_report(app.job_queue)
     log.info("DNH Care bot started. Daily post at %s IST. Publishing to '%s'.",
              val, config.PUBLISH_BRANCH)
     app.run_polling(allowed_updates=Update.ALL_TYPES)

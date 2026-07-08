@@ -154,6 +154,26 @@ trick = canvas image-sequence scrub.
           GBP_LOCATION_ID (+ optional GBP_POST_IMAGE_URL). GBP = OAuth refresh-token
           only, NO service accounts. LocalPost.summary limit = 1500 chars.
           ROLLBACK: branch backup-pre-gbp-20260707; /gbp off kills posting instantly.
+- GBP WEEKLY INTELLIGENCE REPORT (added 2026-07-08):
+    every Monday 09:00 IST (config.REPORT_DAY/REPORT_TIME, .env only — no /set command
+    yet) the bot sends a Telegram digest: call/site-click/direction/impression counts
+    (7-day vs prior-7-day % change), TOP SEARCH KEYWORDS locals actually used to find
+    the clinic on Google (Performance API searchkeywords/impressions/monthly), and a
+    review snapshot (total/avg rating/new this week, read-only — never auto-replies).
+    On demand: /report. UTM TAGGING: every GBP post's outbound URL gets
+    ?utm_source=gbp&utm_medium=post so GA4/Search Console can attribute traffic.
+    KEYWORD -> TOPIC LOOP: insights.suggest_topics() cross-references the top search
+    keywords against topics.list_done_titles() (same dedup source as the daily
+    auto-picker) and proposes 3 fresh, keyword-matched topics; each shows as an
+    inline "Add #N to queue" button -> topics.add_topic() (one tap, no retyping).
+    PREREQ: user must enable "Business Profile Performance API" in Cloud console
+    (project 957430924241) for the metrics/keywords sections — reviews still work
+    without it. CODE: agent/bot/insights.py (all read-only against Google; one small
+    LLM call for suggest_topics). NOTE: localPosts.reportInsights (per-post view
+    counts / "best performing post") was REMOVED by Google in 2026 — confirmed via
+    live 404 test, no current API replacement exists. config.record_gbp_post still
+    tracks each post's title+resource name (state.json, harmless) in case Google
+    reinstates it; insights.post_insights() is a documented always-None stub.
 - DUPLICATE-POST PREVENTION (added 2026-07-02):
     1. topics.autoselect_viral_topic() feeds the whole "Done" list into the LLM prompt
        ("do NOT propose any of these again") — no repeat topics when the queue is empty.

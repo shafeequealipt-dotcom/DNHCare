@@ -64,6 +64,10 @@ GITHUB_TOKEN = _env("DNH_Github_Token", "DNH_GITHUB_TOKEN", "GITHUB_TOKEN", requ
 GITHUB_REPO = _env("GITHUB_REPO", default="shafeequealipt-dotcom/DNHCare")
 REPO_DIR = _env("REPO_DIR", required=True)
 POST_TIME = _env("POST_TIME", default="06:00")  # default/seed; live value lives in state.json
+# Weekly GBP performance digest — day (0=Mon..6=Sun) and time (IST). Static env,
+# no /set command yet; edit .env + restart to change.
+REPORT_DAY = int(_env("REPORT_DAY", default="0"))
+REPORT_TIME = _env("REPORT_TIME", default="09:00")
 # Branch the bot publishes to. main = live (auto-deploys). Use development for a dry run.
 PUBLISH_BRANCH = _env("PUBLISH_BRANCH", default="main")
 
@@ -160,6 +164,22 @@ def set_gbp_cta(v: str) -> str:
     with open(STATE_FILE, "w", encoding="utf-8") as f:
         json.dump(state, f)
     return v
+
+
+# ---- recent GBP local posts (title + resource name), so the weekly digest can
+#      report which post performed best via localPosts.reportInsights. Capped
+#      to the most recent 15; oldest drop off automatically. ----
+def record_gbp_post(title: str, resource_name: str):
+    state = _read_state()
+    posts = state.get("gbp_posts", [])
+    posts.insert(0, {"title": title, "name": resource_name})
+    state["gbp_posts"] = posts[:15]
+    with open(STATE_FILE, "w", encoding="utf-8") as f:
+        json.dump(state, f)
+
+
+def get_gbp_posts(n: int = 5) -> list:
+    return _read_state().get("gbp_posts", [])[:n]
 
 
 # ---- daily post time (switchable from Telegram), persisted ----

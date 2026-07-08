@@ -60,13 +60,15 @@ def _api(method: str, path: str, payload: dict | None = None) -> dict:
         raise RuntimeError(f"GBP API {e.code} on {method} {path}: {detail}") from e
 
 
-def _clean_summary(text: str) -> str:
-    """Plain-text the summary (GBP posts don't render HTML/markdown) and cap it."""
+def _clean_summary(text: str, limit: int = SUMMARY_LIMIT) -> str:
+    """Plain-text the summary (GBP posts don't render HTML/markdown) and cap it.
+    Markdown-strip runs on LLM prose only — call this BEFORE appending any URL
+    (a URL's underscores, e.g. utm_source, would otherwise be stripped too)."""
     text = re.sub(r"<[^>]+>", " ", text or "")
     text = re.sub(r"[*_#`]", "", text)
     text = re.sub(r"\s+", " ", text).strip()
-    if len(text) > SUMMARY_LIMIT:
-        text = text[:SUMMARY_LIMIT - 1].rsplit(" ", 1)[0].rstrip(".,;:") + "…"
+    if len(text) > limit:
+        text = text[:limit - 1].rsplit(" ", 1)[0].rstrip(".,;:") + "…"
     return text
 
 
@@ -79,16 +81,25 @@ def create_local_post(summary: str, blog_url: str) -> str:
       LEARN_MORE -> clickable "Learn more" link to the blog post.
     Returns the created post's resource name."""
     parent = f"/accounts/{config.GBP_ACCOUNT_ID}/locations/{config.GBP_LOCATION_ID}"
+    # Tag the outbound link so GA4/Search Console can attribute GBP-driven visits.
+    sep = "&" if "?" in blog_url else "?"
+    tagged_url = f"{blog_url}{sep}utm_source=gbp&utm_medium=post"
     cta = config.gbp_cta()
     if cta == "CALL":
-        summary = f"{summary.rstrip()} Read the full guide: {blog_url}"
+        # Clean the LLM prose FIRST (markdown-strip touches underscores, which
+        # would corrupt utm_source/utm_medium), reserve room for the URL suffix,
+        # then append the URL raw so it's never touched or truncated.
+        suffix = f" Read the full guide: {tagged_url}"
+        clean = _clean_summary(summary, limit=SUMMARY_LIMIT - len(suffix))
+        final_summary = clean + suffix
         call_to_action = {"actionType": "CALL"}
     else:
-        call_to_action = {"actionType": "LEARN_MORE", "url": blog_url}
+        final_summary = _clean_summary(summary)
+        call_to_action = {"actionType": "LEARN_MORE", "url": tagged_url}
     payload = {
         "languageCode": "en",
         "topicType": "STANDARD",
-        "summary": _clean_summary(summary),
+        "summary": final_summary,
         "callToAction": call_to_action,
     }
     if config.GBP_POST_IMAGE_URL:

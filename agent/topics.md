@@ -11,7 +11,6 @@ Bengaluru). Keep each post original, locally useful, and tied to a service page.
 
 ## Queue (oldest first = next up)
 
-
 ## Done (most recent first)
 - 2026-07-08 [Skin] Seasonal skin care: a gentle homeopathic perspective  -> seasonal-skin-care-varthur.html
 - 2026-07-07 [Skin] Seasonal skin care: a gentle homeopathic perspective  -> homeopathy-seasonal-skin-care-bengaluru-varthur.html
