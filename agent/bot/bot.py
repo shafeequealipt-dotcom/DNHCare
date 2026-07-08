@@ -116,7 +116,8 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "/model – show the current writing model\n"
         "/models – list all live free models, numbered\n"
         "/setmodel <number> – switch to a model by its number from /models\n"
-        "/gbp – Google Business Profile auto-post status; /gbp on | off\n"
+        "/gbp – Google Business Profile auto-post status; /gbp on | off; "
+        "/gbp cta call | learn\n"
         "/time – show the daily post time\n"
         "/settime HH:MM – set the daily post time (IST)\n"
         "/prompt – show the content-generation prompt\n"
@@ -257,6 +258,13 @@ async def cmd_gbp(update: Update, context: ContextTypes.DEFAULT_TYPE):
     arg = (" ".join(context.args)).strip().lower()
     if arg in ("on", "off"):
         config.set_gbp_enabled(arg == "on")
+    elif arg.startswith("cta"):
+        rest = arg[3:].strip()
+        if rest in ("call", "learn", "learn_more", "learnmore"):
+            config.set_gbp_cta(rest)
+        else:
+            await update.message.reply_text("Usage: /gbp cta call  or  /gbp cta learn")
+            return
     if not gbp.is_configured():
         await update.message.reply_text(
             "Google Business Profile is NOT configured yet — the bot publishes the "
@@ -265,10 +273,15 @@ async def cmd_gbp(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "the printed values. See agent/bot/gbp_auth.py.")
         return
     state = "ON ✅" if config.gbp_enabled() else "OFF ⏸"
+    cta = config.gbp_cta()
+    cta_desc = ("Call now 📞 (clinic number; blog URL as plain text in the post)"
+                if cta == "CALL" else "Learn more 🔗 (clickable link to the blog post)")
     await update.message.reply_text(
         f"Google Business Profile auto-post is {state}.\n"
+        f"CTA button: {cta_desc}\n\n"
         "On ✅ Approve, the blog is published AND shared to the clinic's Google "
-        "listing with a Learn-more link.\nToggle with /gbp on or /gbp off.")
+        "listing.\nToggle with /gbp on | /gbp off.\n"
+        "Switch button with /gbp cta call | /gbp cta learn.")
 
 
 async def cmd_generate(update: Update, context: ContextTypes.DEFAULT_TYPE):

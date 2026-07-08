@@ -56,6 +56,8 @@ GBP_CLIENT_SECRET = _env("GBP_CLIENT_SECRET")
 GBP_REFRESH_TOKEN = _env("GBP_REFRESH_TOKEN")
 GBP_ACCOUNT_ID = _env("GBP_ACCOUNT_ID")      # numeric id from accounts/{id}
 GBP_LOCATION_ID = _env("GBP_LOCATION_ID")    # numeric id from locations/{id}
+# Optional: public https image attached to every GBP post (dormant if unset).
+GBP_POST_IMAGE_URL = _env("GBP_POST_IMAGE_URL")
 
 # ---- GitHub publish target (token from env — set DNH_Github_Token or GITHUB_TOKEN) ----
 GITHUB_TOKEN = _env("DNH_Github_Token", "DNH_GITHUB_TOKEN", "GITHUB_TOKEN", required=True)
@@ -137,6 +139,27 @@ def set_gbp_enabled(on: bool) -> bool:
     with open(STATE_FILE, "w", encoding="utf-8") as f:
         json.dump(state, f)
     return state["gbp_enabled"]
+
+
+# ---- GBP call-to-action type (runtime /gbp cta call|learn, persisted) ----
+def gbp_cta() -> str:
+    """"CALL" (default — Call-now button using the clinic's listed number) or
+    "LEARN_MORE" (clickable link to the blog post)."""
+    v = _read_state().get("gbp_cta", "CALL")
+    return v if v in ("CALL", "LEARN_MORE") else "CALL"
+
+
+def set_gbp_cta(v: str) -> str:
+    v = v.strip().upper()
+    if v in ("LEARN", "LEARN_MORE", "LEARNMORE"):
+        v = "LEARN_MORE"
+    else:
+        v = "CALL"
+    state = _read_state()
+    state["gbp_cta"] = v
+    with open(STATE_FILE, "w", encoding="utf-8") as f:
+        json.dump(state, f)
+    return v
 
 
 # ---- daily post time (switchable from Telegram), persisted ----

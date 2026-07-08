@@ -71,15 +71,29 @@ def _clean_summary(text: str) -> str:
 
 
 def create_local_post(summary: str, blog_url: str) -> str:
-    """Create a STANDARD local post with a Learn-more CTA to the blog post.
+    """Create a STANDARD local post. CTA comes from config.gbp_cta():
+      CALL       -> "Call now" button using the clinic's listed phone number
+                    (per the v4 API, `url` must be left unset for Call CTAs);
+                    the blog URL is kept as plain text at the end of the summary
+                    so the post still references the site.
+      LEARN_MORE -> clickable "Learn more" link to the blog post.
     Returns the created post's resource name."""
     parent = f"/accounts/{config.GBP_ACCOUNT_ID}/locations/{config.GBP_LOCATION_ID}"
+    cta = config.gbp_cta()
+    if cta == "CALL":
+        summary = f"{summary.rstrip()} Read the full guide: {blog_url}"
+        call_to_action = {"actionType": "CALL"}
+    else:
+        call_to_action = {"actionType": "LEARN_MORE", "url": blog_url}
     payload = {
         "languageCode": "en",
         "topicType": "STANDARD",
         "summary": _clean_summary(summary),
-        "callToAction": {"actionType": "LEARN_MORE", "url": blog_url},
+        "callToAction": call_to_action,
     }
+    if config.GBP_POST_IMAGE_URL:
+        payload["media"] = [{"mediaFormat": "PHOTO",
+                             "sourceUrl": config.GBP_POST_IMAGE_URL}]
     out = _api("POST", parent + "/localPosts", payload)
     return out.get("name", "(created)")
 

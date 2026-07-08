@@ -132,22 +132,28 @@ trick = canvas image-sequence scrub.
     missing required element (med-disclaimer, author-box, BlogPosting/BreadcrumbList schema,
     canonical, scroll-progress, footer NAP, WhatsApp CTA); no internal service-page link
     (clean URL, no .html); body < 380 words; missing/too-short title or meta description.
-- GOOGLE BUSINESS PROFILE AUTO-POST (built 2026-07-07, Phase 1 = code only, DORMANT):
-    on ✅ Approve, after the blog publishes, bot ALSO creates a GBP local post
-    (STANDARD + Learn-more CTA -> clean blog URL). GBP failure never blocks the blog.
+- GOOGLE BUSINESS PROFILE AUTO-POST (LIVE since 2026-07-07; all 5 env vars set on Oracle):
+    on ✅ Approve, after the blog publishes, bot ALSO creates a GBP local post.
+    GBP failure never blocks the blog.
+    STYLE (2026-07-08): gbp_summary = informative MINI-ARTICLE (4-6 sentences,
+          600-1200 chars, keyword+locality in FIRST sentence — only ~100 chars show
+          before truncation; practical takeaways; call-the-clinic close). NOT a teaser.
+    CTA (2026-07-08): default = CALL ("Call now" button -> clinic's listed number;
+          v4 API requires url UNSET for CALL; blog URL appended as plain text
+          "Read the full guide: <url>"). Toggle: /gbp cta call | /gbp cta learn
+          (LEARN_MORE = clickable link to post). Persisted in state.json (gbp_cta).
+    OPTIONAL IMAGE: set GBP_POST_IMAGE_URL in .env (public https) to attach a photo
+          to every post. Unset = no image (dormant).
     CODE: agent/bot/gbp.py (token refresh + create/delete local post, stdlib urllib);
           agent/bot/gbp_auth.py (one-time OAuth: `login` mints refresh token,
           `discover` lists account/location ids); content.py Post.gbp_summary +
-          gbp_blurb() fallback chain (summary -> lede -> title+meta) with the same
-          banned-words + remedy-names scan as the gate; /gbp on|off|status in Telegram.
-    DORMANT until ALL 5 env vars in agent/bot/.env: GBP_CLIENT_ID, GBP_CLIENT_SECRET,
-          GBP_REFRESH_TOKEN, GBP_ACCOUNT_ID, GBP_LOCATION_ID (see .env.example).
-    USER MUST DO (Phase 2): (a) request GBP API quota access (default quota = 0!)
-          https://developers.google.com/my-business/content/prereqs
-          (b) create OAuth client (Desktop app) -> give client id+secret.
-    THEN (Phase 3): run gbp_auth login+discover on VM, fill .env, live test
-          (create + delete a post), deploy. GBP = OAuth refresh-token only,
-          NO service accounts. LocalPost.summary limit = 1500 chars.
+          gbp_blurb() fallback chain (summary -> title+lede+invite -> title+meta+invite)
+          with the same banned-words + remedy-names scan as the gate;
+          /gbp on|off|cta|status in Telegram.
+    ENV: GBP_CLIENT_ID, GBP_CLIENT_SECRET, GBP_REFRESH_TOKEN, GBP_ACCOUNT_ID,
+          GBP_LOCATION_ID (+ optional GBP_POST_IMAGE_URL). GBP = OAuth refresh-token
+          only, NO service accounts. LocalPost.summary limit = 1500 chars.
+          ROLLBACK: branch backup-pre-gbp-20260707; /gbp off kills posting instantly.
 - DUPLICATE-POST PREVENTION (added 2026-07-02):
     1. topics.autoselect_viral_topic() feeds the whole "Done" list into the LLM prompt
        ("do NOT propose any of these again") — no repeat topics when the queue is empty.

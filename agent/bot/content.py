@@ -49,7 +49,7 @@ _SCHEMA = """{
   "lede": "opening paragraph; use the focus keyword within the first sentence or two",
   "sections": [{"heading": "descriptive keyword-aware H2", "paragraphs": ["..."], "bullets": ["...optional..."]}],
   "faqs": [{"question": "string", "answer": "string"}],
-  "gbp_summary": "2-4 warm, plain-text sentences (<=1200 chars) inviting locals to read the post on the clinic website; same YMYL safety rules; no remedy names, no hashtags, no markdown"
+  "gbp_summary": "4-6 informative plain-text sentences (600-1200 chars) written as a useful mini-article for the clinic's Google Business Profile, NOT a teaser. Structure: (1) FIRST sentence = an informative statement about the condition/season that contains the focus keyword AND a local cue (Varthur/Whitefield/Bengaluru) — only ~100 chars show before truncation; (2) then 2-3 practical, genuinely useful takeaways from the post (real information the reader can act on — never phrases like 'this guide explains'); (3) close by inviting the reader to call Dr. Nafia's Homoeopathic Medical Centre in Varthur. Same YMYL safety rules; no remedy names, no hashtags, no markdown, no emojis"
 }"""
 
 # Fallback used only if agent/content_prompt.txt is missing. The live, editable prompt
@@ -164,9 +164,11 @@ def gbp_blurb(post: Post) -> str:
     gate (banned overclaims + remedy names); a safety hit falls back to the
     meta description, which is already gate-checked inside the post HTML."""
     from .. import check_post  # agent/ is a namespace package (no __init__.py needed)
+    invite = ("Call Dr. Nafia's Homoeopathic Medical Centre in Varthur to "
+              "discuss your case.")
     candidates = [post.gbp_summary,
-                  f"{post.lede}",
-                  f"{post.title} — {post.meta_description}"]
+                  f"{post.title}. {post.lede} {invite}",
+                  f"{post.title} — {post.meta_description} {invite}"]
     for text in candidates:
         text = (text or "").strip()
         if not text:
