@@ -1,4 +1,4 @@
-"""Generate a blog post: an OpenRouter model produces structured JSON content, Python
+"""Generate a blog post: a Groq model produces structured JSON content, Python
 assembles the HTML deterministically so schema, disclaimer, author box, canonical and
 CTA are always present and the safety gate passes."""
 import re
@@ -121,7 +121,7 @@ def _extract_json(text: str) -> dict:
 
 
 def generate_post(topic: str, feedback: str = "") -> Post:
-    """Generate structured post content via the currently-selected OpenRouter model.
+    """Generate structured post content via the currently-selected Groq model.
     `feedback` is appended on regeneration. Retries once on a parse/validation error."""
     ask = f"Write the post for this topic:\n{topic}\n"
     if feedback:

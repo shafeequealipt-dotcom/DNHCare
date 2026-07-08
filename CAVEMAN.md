@@ -109,17 +109,20 @@ trick = canvas image-sequence scrub.
 - GOAL = 1 new post/day INTO /blog/, DRAFT only -> sent to Telegram with Approve/Reject ->
   on Approve the bot commits to main -> GitHub Pages auto-deploys. Approval happens IN TELEGRAM.
 - ARCHITECTURE = standing Python service on the user's Oracle Cloud VM (systemd), long-polling Telegram.
-- LLM PROVIDER = **OpenRouter** (OpenAI-compatible), NOT Anthropic. Free models by default.
-  Model is RUNTIME-SWITCHABLE from Telegram (/model /models /setmodel), persisted in agent/bot/state.json (gitignored).
-  Default = qwen/qwen3-next-80b-a3b-instruct:free; presets incl. llama-3.3-70b, gpt-oss-120b, gemma-4, nemotron (all :free).
-  NOTE: OpenRouter's free roster changes — if a model 404s "unavailable for free", pick another via /models or /setmodel.
-  Free models get rate-limited (429) upstream; llm.chat retries 4x; user can switch model if one is flaky.
+- LLM PROVIDER = **Groq** (OpenAI-compatible), NOT Anthropic. Switched from OpenRouter 2026-07-08
+  (env: DNHCARE_Groq_Api / GROQ_API_KEY). Model is RUNTIME-SWITCHABLE from Telegram
+  (/model /models /setmodel), persisted in agent/bot/state.json (gitignored).
+  Default = llama-3.3-70b-versatile; presets incl. gpt-oss-120b/20b, llama-4-scout, qwen3-32b,
+  groq/compound. /models fetches Groq's LIVE full model catalog (llm.list_models, excludes
+  non-chat models: whisper/orpheus/prompt-guard). Groq free tier is rate-limited (429) upstream;
+  llm.chat retries; user can switch model if one is flaky.
 - CODE = /agent/bot/  (a Python package):
-    config.py    = Telegram creds from SYSTEM env (DNH_Telegram_Token / DNH_Telegram_ID); OpenRouter key + base url;
-                   PRESET_MODELS; get_model()/set_model() persist to state.json; brand constants; category->service map.
-    llm.py       = shared OpenRouter client + chat() with 429 retry.
-    topics.py    = read/add/consume agent/topics.md; autoselect_viral_topic() = date-aware OpenRouter call (no web tool).
-    content.py   = OpenRouter (current model) returns JSON -> robust parse -> Pydantic Post; Python assembles the post
+    config.py    = Telegram creds from SYSTEM env (DNH_Telegram_Token / DNH_Telegram_ID); Groq
+                   key + base url; PRESET_MODELS; get_model()/set_model() persist to state.json;
+                   brand constants; category->service map.
+    llm.py       = shared Groq client + chat() with 429 retry; list_models() live roster fetch.
+    topics.py    = read/add/consume agent/topics.md; autoselect_viral_topic() = date-aware Groq call (no web tool).
+    content.py   = Groq (current model) returns JSON -> robust parse -> Pydantic Post; Python assembles the post
                    HTML deterministically (schema/disclaimer/author/canonical/CTA always present).
     publisher.py = sync main, stage draft, run gate, on approve: insert blog index card + sitemap loc + mark topic done + git commit/push main.
     bot.py       = telegram bot: JobQueue daily at POST_TIME (IST); /generate /topics /addtopic /model /models /setmodel;
@@ -182,12 +185,12 @@ trick = canvas image-sequence scrub.
        Checks git-tracked files, so gate-retries of the in-flight draft are not false-flagged.
 - SECRETS:
     Telegram = SYSTEM env vars DNH_Telegram_Token + DNH_Telegram_ID (already set on user's Windows machine; export on the VM).
-    OPENROUTER_API_KEY = system env (already set) or .env.
+    DNHCARE_Groq_Api (or GROQ_API_KEY) = system env (already set) or .env.
     in agent/bot/.env: GITHUB_TOKEN (fine-grained PAT, Contents:RW on DNHCare), REPO_DIR, POST_TIME, optional DEFAULT_MODEL.
 - IMPORTANT = bot REPO_DIR = /home/ubuntu/DNHCare-staging (development branch). Bot pushes to development.
   GitHub Actions deploy-staging.yml auto-pulls staging. User merges dev->main -> deploy-production.yml auto-pulls production.
-- TESTED locally: modules compile; live OpenRouter free-model generation produced a valid post that PASSED the gate
-  (627 words); model set/get persistence works; JSON-LD valid. NOT yet run live on the VM (needs GitHub PAT + VM).
+- TESTED locally: modules compile; live Groq generation produced a valid post that PASSED the gate;
+  model set/get persistence works; JSON-LD valid.
 
 ## FILES (the whole site)
 - index.html ............ homepage. 2 scrub sections (#hero, #philosophy) + about/services/stories/faq/visit.

@@ -1,4 +1,4 @@
-"""Central config — Telegram creds from system env (DNH_Telegram_*), OpenRouter for
+"""Central config — Telegram creds from system env (DNH_Telegram_*), Groq for
 content generation, runtime-switchable model persisted in state.json."""
 import os
 import json
@@ -26,25 +26,25 @@ TELEGRAM_BOT_TOKEN = _env("DNH_Telegram_Token", "DNH_TELEGRAM_TOKEN",
 TELEGRAM_CHAT_ID = int(_env("DNH_Telegram_ID", "DNH_TELEGRAM_ID",
                             "TELEGRAM_CHAT_ID", required=True))
 
-# ---- OpenRouter (OpenAI-compatible) for content generation ----
-OPENROUTER_API_KEY = _env("OPENROUTER_API_KEY", required=True)
-OPENROUTER_BASE_URL = _env("OPENROUTER_BASE_URL", default="https://openrouter.ai/api/v1")
+# ---- Groq (OpenAI-compatible) for content generation ----
+GROQ_API_KEY = _env("DNHCARE_Groq_Api", "GROQ_API_KEY", required=True)
+GROQ_BASE_URL = _env("GROQ_BASE_URL", default="https://api.groq.com/openai/v1")
 
-# Fallback list shown by /models when the LIVE roster fetch fails (e.g. quota 429).
-# The live fetch (llm.list_free_models) normally returns the full ~24; this 10-model
-# list only kicks in as a safety net. OpenRouter's free roster changes over time —
+# Fallback list shown by /models when the LIVE roster fetch fails. The live fetch
+# (llm.list_models) normally returns Groq's full current chat-capable catalog;
+# this list only kicks in as a safety net. Groq's roster changes over time —
 # refresh with /models or set any id with /setmodel.
 PRESET_MODELS = [
-    "openai/gpt-oss-120b:free",
-    "openai/gpt-oss-20b:free",
-    "nvidia/nemotron-3-super-120b-a12b:free",
-    "nvidia/nemotron-3-ultra-550b-a55b:free",
-    "meta-llama/llama-3.3-70b-instruct:free",
-    "qwen/qwen3-next-80b-a3b-instruct:free",
-    "google/gemma-4-31b-it:free",
-    "qwen/qwen3-coder:free",
-    "cognitivecomputations/dolphin-mistral-24b-venice-edition:free",
-    "tencent/hy3:free",
+    "llama-3.3-70b-versatile",
+    "openai/gpt-oss-120b",
+    "openai/gpt-oss-20b",
+    "meta-llama/llama-4-scout-17b-16e-instruct",
+    "qwen/qwen3-32b",
+    "qwen/qwen3.6-27b",
+    "llama-3.1-8b-instant",
+    "groq/compound",
+    "groq/compound-mini",
+    "allam-2-7b",
 ]
 DEFAULT_MODEL = _env("DEFAULT_MODEL", default=PRESET_MODELS[0])
 

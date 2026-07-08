@@ -1,7 +1,7 @@
 """GBP weekly intelligence: performance metrics, search keywords locals actually
 used, a review snapshot, and our own post performance — reduced to a Telegram
 digest, plus an LLM topic-suggestion step that closes the loop back into
-agent/topics.md. Read-only against Google (no writes); one small OpenRouter call
+agent/topics.md. Read-only against Google (no writes); one small Groq call
 for suggest_topics(). Dormant unless gbp.is_configured().
 """
 import datetime
