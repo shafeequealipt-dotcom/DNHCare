@@ -13,6 +13,7 @@ Bengaluru). Keep each post original, locally useful, and tied to a service page.
 
 
 ## Done (most recent first)
+- 2026-07-10 [Allergies] Navigating Bengaluru's Monsoon Fungal Allergies: Homeopathic Insights into Prevention and Relief from Fungal Spores.  -> bengaluru-monsoon-allergies-homeopathy-relief.html
 - 2026-07-09 [Migraine] Monsoon Mood Swings and Migraines: Unpacking the Weather-Emotion Connection for Relief  -> migraine-homeopathy-in-bengaluru.html
 - 2026-07-08 [Skin] Seasonal skin care: a gentle homeopathic perspective  -> seasonal-skin-care-varthur.html
 - 2026-07-07 [Skin] Seasonal skin care: a gentle homeopathic perspective  -> homeopathy-seasonal-skin-care-bengaluru-varthur.html
