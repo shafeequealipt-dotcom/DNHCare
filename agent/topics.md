@@ -13,6 +13,7 @@ Bengaluru). Keep each post original, locally useful, and tied to a service page.
 
 
 ## Done (most recent first)
+- 2026-07-11 [Children] Monsoon Immunity Boosters for Kids: Homeopathic Remedies to Prevent Infections and Promote Healthy Growth.  -> monsoon-immunity-boosters-for-kids-in-varthur.html
 - 2026-07-10 [Allergies] Navigating Bengaluru's Monsoon Fungal Allergies: Homeopathic Insights into Prevention and Relief from Fungal Spores.  -> bengaluru-monsoon-allergies-homeopathy-relief.html
 - 2026-07-09 [Migraine] Monsoon Mood Swings and Migraines: Unpacking the Weather-Emotion Connection for Relief  -> migraine-homeopathy-in-bengaluru.html
 - 2026-07-08 [Skin] Seasonal skin care: a gentle homeopathic perspective  -> seasonal-skin-care-varthur.html
