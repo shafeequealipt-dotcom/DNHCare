@@ -13,6 +13,7 @@ Bengaluru). Keep each post original, locally useful, and tied to a service page.
 
 
 ## Done (most recent first)
+- 2026-07-15 [Migraine] Unraveling the Connection Between Monsoon-Induced Barometric Pressure Changes and Migraine Episodes in Bengaluru: A Homeopathic Exploration of Triggers and Relief Strategies  -> migraine-homeopathy-bengaluru.html
 - 2026-07-14 [Skin] Understanding and Managing Photodermatitis: A Homeopathic Approach to Sensitivity and Rashes Caused by Monsoon Sun Exposure in Bengaluru.  -> photodermatitis-homeopathy-bengaluru.html
 - 2026-07-14 [Children] Monsoon Eye Care for Kids: Homeopathic Tips to Prevent and Treat Conjunctivitis and Other Seasonal Eye Infections.  -> homeopathy-for-kids-eye-infections-in-bengaluru.html
 - 2026-07-12 [Women] Navigating Monsoon-Related Fluid Retention and Breast Tenderness in Bengaluru: A Homeopathic Perspective on Hormonal Balance and Relief.  -> monsoon-fluid-retention-homeopathy-bengaluru-women.html
