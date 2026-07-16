@@ -40,8 +40,20 @@ def _access_token() -> str:
         "grant_type": "refresh_token",
     }).encode()
     req = urllib.request.Request(TOKEN_URL, data=body, method="POST")
-    with urllib.request.urlopen(req, timeout=30) as r:
-        return json.load(r)["access_token"]
+    try:
+        with urllib.request.urlopen(req, timeout=30) as r:
+            return json.load(r)["access_token"]
+    except urllib.error.HTTPError as e:
+        detail = e.read().decode(errors="replace")[:300]
+        hint = ""
+        if "invalid_grant" in detail:
+            hint = (" — the refresh token is expired or revoked. If the OAuth "
+                   "consent screen is still in \"Testing\" publishing status, "
+                   "Google expires refresh tokens after 7 days: re-run "
+                   "`python3 -m agent.bot.gbp_auth login` for a new one, or "
+                   "publish the consent screen to Production to stop this "
+                   "recurring.")
+        raise RuntimeError(f"GBP token refresh {e.code}: {detail}{hint}") from e
 
 
 def _api(method: str, path: str, payload: dict | None = None) -> dict:
