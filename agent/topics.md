@@ -13,6 +13,7 @@ Bengaluru). Keep each post original, locally useful, and tied to a service page.
 
 
 ## Done (most recent first)
+- 2026-07-20 [Allergies] Debunking Common Myths About Monsoon-Triggered Allergic Reactions: Separating Fact from Fiction in Bengaluru's Rainy Season.  -> monsoon-allergies-in-bengaluru.html
 - 2026-07-19 [Children] Homeopathic Approaches to Soothing Monsoon-Triggered Eczema Flare-Ups in Kids: A Guide to Gentle Skin Care and Emotional Support.  -> homeopathy-for-child-eczema-in-bengaluru.html
 - 2026-07-18 [Migraine] Exploring the Link Between Monsoon-Disrupted Sleep Patterns and Migraine Frequency in Bengaluru: A Homeopathic Perspective on Sleep Hygiene and Relief Strategies.  -> migraine-homeopathy-bengaluru-monsoon-sleep.html
 - 2026-07-17 [Skin] Monsoon-Induced Pigmentation: Understanding the Causes and Exploring Homeopathic Remedies for Hyperpigmentation and Skin Discoloration in Bengaluru's Humid Climate.  -> homeopathy-for-skin-pigmentation-in-bengaluru.html
