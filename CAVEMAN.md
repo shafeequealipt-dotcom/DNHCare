@@ -18,15 +18,19 @@ READ THIS FILE ALONE = KNOW EVERYTHING. PUSH TO GITHUB. DONE.
   DEPLOY RULE: test token auth + dry-run push BEFORE deploying bot changes (see DEPLOYMENT RULES).
 - BACKUP of old main = branch `backup-main-20260614` (commit df23bf7). rollback = `git push -f origin backup-main-20260614:main`.
 - ORACLE DEPLOY = DONE (2026-06-14). bot runs 24/7 on the Oracle VM as a systemd service.
-    host = ubuntu@140.245.230.251 (Ubuntu 22.04). ssh key (local) = ~/.ssh/oracle.key.
+    CURRENT instance (since 2026-07-22) = ubuntu@68.233.109.57 (instance-20260722-1845).
+    Old instance (140.245.230.251) was retired — do not use, it will time out.
+    ssh key (local) = read from env vars ORACLE_SSH_KEY + ORACLE_HOST (set in ~/.zshrc);
+    literal fallback path = "/Users/naash/Documents/Projects/Personal-2/Orcale/NEW KEYS/ssh-key-2026-07-22.key".
     venv = /home/ubuntu/dnhvenv ; secrets = /home/ubuntu/DNHCare/agent/bot/.env (chmod 600).
     service = dnhcare-bot (systemd, enabled=survives reboot). manage: `sudo systemctl {status|restart|stop} dnhcare-bot` ; logs `journalctl -u dnhcare-bot -f`.
-    config: PUBLISH_BRANCH=main, POST_TIME=06:00 IST, model=openai/gpt-oss-120b:free, token=DNH_Github_Token (fine-grained PAT, Contents:R/W).
+    config: PUBLISH_BRANCH=main, POST_TIME=06:00 IST, model=@cf/meta/llama-3.3-70b-instruct-fp8-fast
+    (Cloudflare Workers AI), token=DNH_GitHub_Token (fine-grained PAT, Contents:R/W).
 - LOCAL bot = STOPPED (Oracle is the only instance). RUN ONLY ONE BOT (same Telegram token -> 409).
 - GOTCHA hit during deploy: fine-grained PAT needs **Contents: Read AND write** + the repo selected under "Only select repositories".
 
-## HOSTING ARCHITECTURE (2026-06-19)
-TWO ENVIRONMENTS ON ORACLE VM (140.245.230.251):
+## HOSTING ARCHITECTURE (2026-06-19, IP updated 2026-07-23)
+TWO ENVIRONMENTS ON ORACLE VM (68.233.109.57 — instance-20260722-1845):
   production  = ~/DNHCare          (main branch)      -> dnhcare.co.in
   staging     = ~/DNHCare-staging  (development branch)-> staging.dnhcare.co.in
 
@@ -46,10 +50,9 @@ SSL = certbot already installed. run AFTER DNS propagates:
   sudo certbot --nginx -d dnhcare.co.in -d www.dnhcare.co.in --non-interactive --agree-tos -m shafeequealipt@gmail.com
   sudo certbot --nginx -d staging.dnhcare.co.in --non-interactive --agree-tos -m shafeequealipt@gmail.com
 
-DNS CHANGES NEEDED (user does in registrar — PENDING):
-  dnhcare.co.in     A record -> 140.245.230.251  (remove GitHub Pages CNAME first)
-  www.dnhcare.co.in A record -> 140.245.230.251
-  staging.dnhcare.co.in A record -> 140.245.230.251
+DNS = DONE. dnhcare.co.in, www, and staging.dnhcare.co.in all resolve to 68.233.109.57
+  (confirmed live, HTTP 200, as of 2026-07-23). If the VM is ever replaced again,
+  update all three A records to match.
 
 CLEAN URLs: Nginx rewrites /blog/my-post -> serves blog/my-post.html (no extension in URL).
   Old .html URLs 301-redirect to clean URLs automatically.
@@ -292,7 +295,8 @@ J. Service schema per treatment page — DONE (MedicalTherapy + MedicalWebPage +
 
 ## DEPLOYMENT RULES (MANDATORY — NO EXCEPTIONS)
 - BEFORE pushing to main or Oracle: test the full affected flow end-to-end. For bot changes: verify token auth (curl 200), dry-run git push, restart service and confirm `active (running)`. For site changes: run check_post.py on representative posts. Never deploy untested code.
-- Oracle SSH key = /Users/naash/Documents/Projects/Personal-2/Orcale/ssh-key-2026-05-25 (1).key  host = ubuntu@140.245.230.251
+- Oracle SSH: use env vars ORACLE_SSH_KEY + ORACLE_HOST (set in ~/.zshrc) — survives
+  future VM swaps. Current host = 68.233.109.57 (instance-20260722-1845, since 2026-07-22).
 - ALWAYS confirm with user before any push to main or any Oracle operation. Ask explicitly and wait for "yes".
 
 ## RULES / GOTCHAS
