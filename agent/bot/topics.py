@@ -91,7 +91,7 @@ def mark_done(topic: str, slug: str):
 
 
 def autoselect_viral_topic() -> str:
-    """Ask the current Groq model for ONE timely, shareable, healthcare-relevant
+    """Ask the current Cloudflare Workers AI model for ONE timely, shareable, healthcare-relevant
     blog topic suited to the clinic. Returns a '[Category] Title' line."""
     cats = " / ".join(config.CATEGORIES)
     today = datetime.date.today()

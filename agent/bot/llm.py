@@ -1,5 +1,6 @@
-"""Shared Groq (OpenAI-compatible) client with a rate-limit retry — models can be
-rate-limited upstream on the free tier, so retry a few times before giving up."""
+"""Shared Cloudflare Workers AI (OpenAI-compatible) client with a rate-limit
+retry — models can be rate-limited upstream on the free tier, so retry a few
+times before giving up."""
 import time
 import json
 import urllib.request
@@ -7,32 +8,47 @@ import openai
 from openai import OpenAI
 from . import config
 
-# Groq also serves non-chat models (speech-to-text, TTS, moderation classifiers)
-# under the same /models endpoint. These can't take a chat-completions blog-writing
-# prompt, so list_models() excludes them by id substring.
-_NON_CHAT_MARKERS = ("whisper", "orpheus", "prompt-guard")
+# Cloudflare's catalog spans many task types (speech, image, embeddings, etc.)
+# under one /ai/models/search endpoint; only "Text Generation" models can take a
+# chat-completions blog-writing prompt. Models tagged moderation/guardrails
+# (e.g. llama-guard) are classifiers, not general writers — excluded too.
+_TEXT_GEN_TASK = "Text Generation"
+_EXCLUDE_TAGS = ("moderation", "guardrails")
+_MODELS_SEARCH_URL = (
+    f"https://api.cloudflare.com/client/v4/accounts/{config.CF_ACCOUNT_ID}"
+    "/ai/models/search")
 
 
 def list_models() -> list:
-    """Fetch the CURRENT chat-capable model roster live from Groq, sorted
-    alphabetically. Stdlib-only GET so it can't be tripped up by SDK quirks.
-    Raises on network/HTTP error — caller falls back to config.PRESET_MODELS."""
-    url = config.GROQ_BASE_URL.rstrip("/") + "/models"
-    # Groq's edge (Cloudflare) 403s the default "Python-urllib/x.y" User-Agent —
-    # any normal-looking UA passes.
+    """Fetch the CURRENT Text Generation model roster live from Cloudflare,
+    sorted alphabetically. Stdlib-only GET so it can't be tripped up by SDK
+    quirks. Raises on network/HTTP error — caller falls back to
+    config.PRESET_MODELS.
+
+    NOTE: the endpoint's page/per_page params don't behave as documented (page=2
+    returns 0 results regardless of total_count) — confirmed live. A single
+    unparameterized call returns Cloudflare's full accessible result set."""
     req = urllib.request.Request(
-        url, headers={"Authorization": f"Bearer {config.GROQ_API_KEY}",
-                     "User-Agent": "dnhcare-bot/1.0"})
+        _MODELS_SEARCH_URL,
+        headers={"Authorization": f"Bearer {config.CF_API_TOKEN}"})
     with urllib.request.urlopen(req, timeout=30) as r:
-        data = json.load(r).get("data", [])
-    ids = (str(m.get("id", "")) for m in data)
-    return sorted(i for i in ids if i and not any(x in i for x in _NON_CHAT_MARKERS))
+        data = json.load(r).get("result", [])
+    ids = []
+    for m in data:
+        if m.get("task", {}).get("name") != _TEXT_GEN_TASK:
+            continue
+        if any(t in _EXCLUDE_TAGS for t in m.get("tags", [])):
+            continue
+        name = str(m.get("name", ""))
+        if name:
+            ids.append(name)
+    return sorted(ids)
 
 # max_retries=0 so the SDK does NOT add its own (long, Retry-After-honoring) backoff on
 # top of ours — otherwise a throttled model hangs for minutes. We handle 429 here.
 _client = OpenAI(
-    base_url=config.GROQ_BASE_URL,
-    api_key=config.GROQ_API_KEY,
+    base_url=config.CF_BASE_URL,
+    api_key=config.CF_API_TOKEN,
     max_retries=0,
     timeout=300,   # 5 min per call — large models can be slow under load
 )

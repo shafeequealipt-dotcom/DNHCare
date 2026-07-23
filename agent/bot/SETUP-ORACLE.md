@@ -11,15 +11,20 @@ publishes it to dnhcare.co.in. Approve/Reject and topic management all happen in
 ## 0. One-time: the secrets
 The bot reads **Telegram** creds from system env vars `DNH_Telegram_Token` and
 `DNH_Telegram_ID` (already set on the user's Windows machine). Content generation uses
-**Groq** (`DNHCARE_Groq_Api`, or `GROQ_API_KEY`). You still need a **GitHub PAT** for publishing.
+**Cloudflare Workers AI** (`DNH_CloudFlare_API` + `DNH_CloudFlare_AccountID`).
+You still need a **GitHub PAT** for publishing.
 - **GitHub PAT** — github.com → Settings → Developer settings → *Fine-grained tokens* →
   repo access = `shafeequealipt-dotcom/DNHCare`, permission **Contents: Read and write**.
-- **Groq key** — console.groq.com → API Keys → create key (`gsk_...`).
-- On the Oracle VM, export the three system secrets (or add them to `.env`):
+- **Cloudflare API token** — dash.cloudflare.com → My Profile → API Tokens → create
+  token with **Workers AI** read/edit permission. Also grab your **Account ID** from
+  the dashboard sidebar.
+- On the Oracle VM, export the four system secrets (or add them to `.env`):
   ```bash
   export DNH_Telegram_Token=...      # bot token
   export DNH_Telegram_ID=...         # numeric chat id
-  export DNHCARE_Groq_Api=gsk_...
+  export DNH_GitHub_Token=github_pat_...
+  export DNH_CloudFlare_API=...
+  export DNH_CloudFlare_AccountID=...
   ```
 
 ## 1. Provision the VM
@@ -44,7 +49,7 @@ python3 -m venv /opt/dnhcare/venv
 ```bash
 cp agent/bot/.env.example agent/bot/.env
 nano agent/bot/.env     # GITHUB_TOKEN, REPO_DIR=/opt/dnhcare/DNHCare, POST_TIME (IST),
-                        # DNHCARE_Groq_Api (if not exported), DEFAULT_MODEL
+                        # DNH_CloudFlare_API/AccountID (if not exported), DEFAULT_MODEL
 ```
 Let git commit as the bot (used for the publish commits):
 ```bash
@@ -77,9 +82,9 @@ journalctl -u dnhcare-bot -f               # live logs
 - `/generate` — draft right now.
 - `/topics` — see the queue.
 - `/addtopic [Skin] Why winter worsens eczema` — queue a topic.
-- `/model` shows the current writing model; `/models` lists Groq's live model catalog, numbered;
-  `/setmodel <number>` (or any Groq model id) switches. Changes take effect immediately and
-  persist across restarts.
+- `/model` shows the current writing model; `/models` lists Cloudflare's live model catalog,
+  numbered; `/setmodel <number>` (or any Cloudflare model id) switches. Changes take effect
+  immediately and persist across restarts.
 - When the queue runs low it auto-picks a timely, healthcare-relevant topic.
 
 ## Notes
@@ -87,5 +92,6 @@ journalctl -u dnhcare-bot -f               # live logs
 - Every draft must pass `agent/check_post.py` (no medical overclaims, disclaimer + author +
   schema present, ≥380 words) before it's even shown to you.
 - To change the daily time: edit `POST_TIME` in `.env`, then `sudo systemctl restart dnhcare-bot`.
-- Cost: content is generated via Groq's free tier by default (llama-3.3-70b-versatile etc.),
-  so ~free; switch to any other Groq model anytime with `/setmodel`.
+- Cost: content is generated via Cloudflare Workers AI's free tier by default
+  (llama-3.3-70b-instruct-fp8-fast etc.), so ~free; switch to any other Cloudflare
+  model anytime with `/setmodel`.

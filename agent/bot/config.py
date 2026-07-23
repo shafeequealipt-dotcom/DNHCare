@@ -1,4 +1,5 @@
-"""Central config — Telegram creds from system env (DNH_Telegram_*), Groq for
+"""Central config — Telegram creds from system env (DNH_Telegram_*), Cloudflare
+Workers AI for
 content generation, runtime-switchable model persisted in state.json."""
 import os
 import json
@@ -26,25 +27,27 @@ TELEGRAM_BOT_TOKEN = _env("DNH_Telegram_Token", "DNH_TELEGRAM_TOKEN",
 TELEGRAM_CHAT_ID = int(_env("DNH_Telegram_ID", "DNH_TELEGRAM_ID",
                             "TELEGRAM_CHAT_ID", required=True))
 
-# ---- Groq (OpenAI-compatible) for content generation ----
-GROQ_API_KEY = _env("DNHCARE_Groq_Api", "GROQ_API_KEY", required=True)
-GROQ_BASE_URL = _env("GROQ_BASE_URL", default="https://api.groq.com/openai/v1")
+# ---- Cloudflare Workers AI (OpenAI-compatible) for content generation ----
+CF_API_TOKEN = _env("DNH_CloudFlare_API", "CLOUDFLARE_API_TOKEN", required=True)
+CF_ACCOUNT_ID = _env("DNH_CloudFlare_AccountID", "CLOUDFLARE_ACCOUNT_ID", required=True)
+CF_BASE_URL = _env("CF_BASE_URL",
+                   default=f"https://api.cloudflare.com/client/v4/accounts/{CF_ACCOUNT_ID}/ai/v1")
 
 # Fallback list shown by /models when the LIVE roster fetch fails. The live fetch
-# (llm.list_models) normally returns Groq's full current chat-capable catalog;
-# this list only kicks in as a safety net. Groq's roster changes over time —
-# refresh with /models or set any id with /setmodel.
+# (llm.list_models) normally returns Cloudflare's full current Text Generation
+# catalog (~25 models); this list only kicks in as a safety net. The roster
+# changes over time — refresh with /models or set any id with /setmodel.
 PRESET_MODELS = [
-    "llama-3.3-70b-versatile",
-    "openai/gpt-oss-120b",
-    "openai/gpt-oss-20b",
-    "meta-llama/llama-4-scout-17b-16e-instruct",
-    "qwen/qwen3-32b",
-    "qwen/qwen3.6-27b",
-    "llama-3.1-8b-instant",
-    "groq/compound",
-    "groq/compound-mini",
-    "allam-2-7b",
+    "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
+    "@cf/openai/gpt-oss-120b",
+    "@cf/openai/gpt-oss-20b",
+    "@cf/meta/llama-4-scout-17b-16e-instruct",
+    "@cf/qwen/qwen2.5-coder-32b-instruct",
+    "@cf/qwen/qwq-32b",
+    "@cf/mistralai/mistral-small-3.1-24b-instruct",
+    "@cf/nvidia/nemotron-3-120b-a12b",
+    "@cf/zai-org/glm-5.2",
+    "@cf/deepseek-ai/deepseek-r1-distill-qwen-32b",
 ]
 DEFAULT_MODEL = _env("DEFAULT_MODEL", default=PRESET_MODELS[0])
 
@@ -59,8 +62,9 @@ GBP_LOCATION_ID = _env("GBP_LOCATION_ID")    # numeric id from locations/{id}
 # Optional: public https image attached to every GBP post (dormant if unset).
 GBP_POST_IMAGE_URL = _env("GBP_POST_IMAGE_URL")
 
-# ---- GitHub publish target (token from env — set DNH_Github_Token or GITHUB_TOKEN) ----
-GITHUB_TOKEN = _env("DNH_Github_Token", "DNH_GITHUB_TOKEN", "GITHUB_TOKEN", required=True)
+# ---- GitHub publish target (token from env — set DNH_GitHub_Token or GITHUB_TOKEN) ----
+GITHUB_TOKEN = _env("DNH_GitHub_Token", "DNH_Github_Token", "DNH_GITHUB_TOKEN",
+                    "GITHUB_TOKEN", required=True)
 GITHUB_REPO = _env("GITHUB_REPO", default="shafeequealipt-dotcom/DNHCare")
 REPO_DIR = _env("REPO_DIR", required=True)
 POST_TIME = _env("POST_TIME", default="06:00")  # default/seed; live value lives in state.json

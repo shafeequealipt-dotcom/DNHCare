@@ -109,20 +109,29 @@ trick = canvas image-sequence scrub.
 - GOAL = 1 new post/day INTO /blog/, DRAFT only -> sent to Telegram with Approve/Reject ->
   on Approve the bot commits to main -> GitHub Pages auto-deploys. Approval happens IN TELEGRAM.
 - ARCHITECTURE = standing Python service on the user's Oracle Cloud VM (systemd), long-polling Telegram.
-- LLM PROVIDER = **Groq** (OpenAI-compatible), NOT Anthropic. Switched from OpenRouter 2026-07-08
-  (env: DNHCARE_Groq_Api / GROQ_API_KEY). Model is RUNTIME-SWITCHABLE from Telegram
-  (/model /models /setmodel), persisted in agent/bot/state.json (gitignored).
-  Default = llama-3.3-70b-versatile; presets incl. gpt-oss-120b/20b, llama-4-scout, qwen3-32b,
-  groq/compound. /models fetches Groq's LIVE full model catalog (llm.list_models, excludes
-  non-chat models: whisper/orpheus/prompt-guard). Groq free tier is rate-limited (429) upstream;
-  llm.chat retries; user can switch model if one is flaky.
+- LLM PROVIDER = **Cloudflare Workers AI** (OpenAI-compatible), NOT Anthropic. Switched from
+  Groq 2026-07-16 (env: DNH_CloudFlare_API + DNH_CloudFlare_AccountID). Model is
+  RUNTIME-SWITCHABLE from Telegram (/model /models /setmodel), persisted in
+  agent/bot/state.json (gitignored).
+  Default = @cf/meta/llama-3.3-70b-instruct-fp8-fast; presets incl. gpt-oss-120b/20b,
+  llama-4-scout, qwen2.5-coder, mistral-small, nemotron, glm, deepseek-r1-distill.
+  /models fetches Cloudflare's LIVE Text Generation catalog (llm.list_models via
+  GET .../ai/models/search, filtered to task.name=="Text Generation", excludes
+  moderation/guardrails-tagged models e.g. llama-guard). NOTE: that endpoint's
+  page/per_page params don't paginate as documented (page=2 returns 0 regardless
+  of total_count) — confirmed live; a single unparameterized call returns the full
+  accessible set. Cloudflare free tier is rate-limited (429) upstream; llm.chat
+  retries; user can switch model if one is flaky.
 - CODE = /agent/bot/  (a Python package):
-    config.py    = Telegram creds from SYSTEM env (DNH_Telegram_Token / DNH_Telegram_ID); Groq
-                   key + base url; PRESET_MODELS; get_model()/set_model() persist to state.json;
-                   brand constants; category->service map.
-    llm.py       = shared Groq client + chat() with 429 retry; list_models() live roster fetch.
-    topics.py    = read/add/consume agent/topics.md; autoselect_viral_topic() = date-aware Groq call (no web tool).
-    content.py   = Groq (current model) returns JSON -> robust parse -> Pydantic Post; Python assembles the post
+    config.py    = Telegram creds from SYSTEM env (DNH_Telegram_Token / DNH_Telegram_ID);
+                   Cloudflare token + account id + base url; PRESET_MODELS;
+                   get_model()/set_model() persist to state.json; brand constants;
+                   category->service map.
+    llm.py       = shared Cloudflare client + chat() with 429 retry; list_models() live
+                   roster fetch (separate /ai/models/search endpoint, not the OpenAI-
+                   compat base).
+    topics.py    = read/add/consume agent/topics.md; autoselect_viral_topic() = date-aware Cloudflare call (no web tool).
+    content.py   = Cloudflare (current model) returns JSON -> robust parse -> Pydantic Post; Python assembles the post
                    HTML deterministically (schema/disclaimer/author/canonical/CTA always present).
     publisher.py = sync main, stage draft, run gate, on approve: insert blog index card + sitemap loc + mark topic done + git commit/push main.
     bot.py       = telegram bot: JobQueue daily at POST_TIME (IST); /generate /topics /addtopic /model /models /setmodel;
@@ -185,12 +194,13 @@ trick = canvas image-sequence scrub.
        Checks git-tracked files, so gate-retries of the in-flight draft are not false-flagged.
 - SECRETS:
     Telegram = SYSTEM env vars DNH_Telegram_Token + DNH_Telegram_ID (already set on user's Windows machine; export on the VM).
-    DNHCARE_Groq_Api (or GROQ_API_KEY) = system env (already set) or .env.
-    in agent/bot/.env: GITHUB_TOKEN (fine-grained PAT, Contents:RW on DNHCare), REPO_DIR, POST_TIME, optional DEFAULT_MODEL.
+    DNH_CloudFlare_API + DNH_CloudFlare_AccountID = system env (already set) or .env.
+    DNH_GitHub_Token (fine-grained PAT, Contents:RW on DNHCare) = system env or .env.
+    in agent/bot/.env: REPO_DIR, POST_TIME, optional DEFAULT_MODEL.
 - IMPORTANT = bot REPO_DIR = /home/ubuntu/DNHCare-staging (development branch). Bot pushes to development.
   GitHub Actions deploy-staging.yml auto-pulls staging. User merges dev->main -> deploy-production.yml auto-pulls production.
-- TESTED locally: modules compile; live Groq generation produced a valid post that PASSED the gate;
-  model set/get persistence works; JSON-LD valid.
+- TESTED locally: modules compile; live Cloudflare generation produced a valid post that PASSED
+  the gate; model set/get persistence works; JSON-LD valid.
 
 ## FILES (the whole site)
 - index.html ............ homepage. 2 scrub sections (#hero, #philosophy) + about/services/stories/faq/visit.

@@ -117,7 +117,7 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "/topics – show the topic queue\n"
         "/addtopic <topic> – add a topic to the queue\n"
         "/model – show the current writing model\n"
-        "/models – list all available Groq models, numbered\n"
+        "/models – list all available Cloudflare Workers AI models, numbered\n"
         "/setmodel <number> – switch to a model by its number from /models\n"
         "/gbp – Google Business Profile auto-post status; /gbp on | off; "
         "/gbp cta call | learn\n"
@@ -201,7 +201,7 @@ async def cmd_model(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def cmd_models(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not _only_owner(update):
         return
-    await update.message.reply_text("Fetching the current available models from Groq…")
+    await update.message.reply_text("Fetching the current available models from Cloudflare…")
     try:
         ids = await asyncio.to_thread(llm.list_models)
     except Exception as e:  # noqa
@@ -225,7 +225,7 @@ async def cmd_models(update: Update, context: ContextTypes.DEFAULT_TYPE):
             if cut > 0:
                 body, chunk = chunk[cut + 1:] + body, chunk[:cut]
         await update.message.reply_text(
-            f"Available Groq models ({len(ids)}):\n\n{chunk}" + (tail if not body else ""))
+            f"Available Cloudflare models ({len(ids)}):\n\n{chunk}" + (tail if not body else ""))
 
 
 async def cmd_setmodel(update: Update, context: ContextTypes.DEFAULT_TYPE):
