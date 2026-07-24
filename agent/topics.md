@@ -13,6 +13,7 @@ Bengaluru). Keep each post original, locally useful, and tied to a service page.
 
 
 ## Done (most recent first)
+- 2026-07-24 [Skin] The Impact of Monsoon-Induced Hard Water on Skin Health: Homeopathic Tips for Mitigating the Effects of Mineral-Rich Water in Bengaluru.  -> monsoon-skin-care-homeopathy-for-hard-water-in-bengaluru.html
 - 2026-07-23 [Children] Homeopathic Strategies for Managing Monsoon-Triggered Bedwetting in Kids: A Comprehensive Guide to Emotional Support and Bladder Health.  -> homeopathy-for-bedwetting-in-bengaluru-kids.html
 - 2026-07-21 [Women] Navigating Monsoon-Related Hormonal Acne: A Homeopathic Perspective on Balancing Skin and Hormones During Bengaluru's Rainy Season.  -> monsoon-acne-homeopathy-bengaluru.html
 - 2026-07-20 [Allergies] Debunking Common Myths About Monsoon-Triggered Allergic Reactions: Separating Fact from Fiction in Bengaluru's Rainy Season.  -> monsoon-allergies-in-bengaluru.html
