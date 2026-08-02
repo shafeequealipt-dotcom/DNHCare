@@ -54,7 +54,8 @@ publisher.discard(post.slug)                 # clean up the test file
 
 ## 2. Google Business Profile (GBP) — local-post auto-publish + weekly digest
 
-Used for: posting the approved blog to the clinic's Google listing on Approve;
+Used for: posting the blog to the clinic's Google listing on every auto-publish
+(no approval step since 2026-07-27 — see `_publish_and_notify` in `bot.py`);
 weekly performance/keyword digest (`/report`).
 
 | File | What lives there |
@@ -63,7 +64,7 @@ weekly performance/keyword digest (`/report`).
 | `agent/bot/gbp.py` | OAuth refresh-token exchange (`_access_token()`); `_api()` (v4 REST helper); `create_local_post()`, `delete_local_post()` |
 | `agent/bot/gbp_auth.py` | **One-time, manual-only** OAuth bootstrap: `login` mints the refresh token, `discover` lists account/location ids. Never run by the bot itself. |
 | `agent/bot/insights.py` | Performance API (`businessprofileperformance.googleapis.com`) for metrics + search keywords; v4 API for review snapshot |
-| `agent/bot/bot.py` | Approve-flow GBP post; `/gbp`, `/report` commands |
+| `agent/bot/bot.py` | `_publish_and_notify()` posts to GBP right after every auto-publish; `/gbp`, `/report` commands |
 | `agent/bot/content.py` | `Post.gbp_summary` field + `gbp_blurb()` fallback chain |
 
 ### If Google rotates the OAuth client (new Client ID/Secret)

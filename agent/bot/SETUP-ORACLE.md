@@ -1,8 +1,11 @@
 # Deploy the DNH Care blog agent on Oracle Cloud
 
-A standing Python service: each day it drafts a blog post, sends it to your Telegram
-with **Approve / Reject** buttons, and on approval commits to `main` → GitHub Pages
-publishes it to dnhcare.co.in. Approve/Reject and topic management all happen in Telegram.
+A standing Python service: each day (at a randomized time inside your configured
+window) it drafts a blog post, runs it through the safety gate, and — if it
+passes — publishes it automatically (commits to `main` → GitHub Actions deploys
+to dnhcare.co.in, and shares to Google Business Profile). No manual approval
+step. Telegram is used for status/control (`/generate`, `/topics`, `/settime`,
+etc.), not for gating what goes live.
 
 > The bot's working clone (`REPO_DIR`) must be on the **`main`** branch and must already
 > contain the `blog/`, `agent/topics.md`, `agent/check_post.py`, and `agent/bot/` files.
@@ -48,7 +51,8 @@ python3 -m venv /opt/dnhcare/venv
 ## 3. Configure
 ```bash
 cp agent/bot/.env.example agent/bot/.env
-nano agent/bot/.env     # GITHUB_TOKEN, REPO_DIR=/opt/dnhcare/DNHCare, POST_TIME (IST),
+nano agent/bot/.env     # GITHUB_TOKEN, REPO_DIR=/opt/dnhcare/DNHCare,
+                        # POST_WINDOW_START/END (IST),
                         # DNH_CloudFlare_API/AccountID (if not exported), DEFAULT_MODEL
 ```
 Let git commit as the bot (used for the publish commits):
@@ -62,9 +66,9 @@ git config user.email "bot@dnhcare.co.in"
 cd /opt/dnhcare/DNHCare
 /opt/dnhcare/venv/bin/python -m agent.bot.bot
 ```
-In Telegram: send `/start`, then `/generate`. You should get a draft with Approve/Reject.
-Approve once and confirm the post appears at `https://dnhcare.co.in/blog/` within ~2 min.
-`Ctrl-C` to stop.
+In Telegram: send `/start`, then `/generate`. It writes a draft, runs the safety gate, and
+if it passes, publishes automatically — confirm the post appears at
+`https://dnhcare.co.in/blog/` within ~2 min. `Ctrl-C` to stop.
 
 ## 5. Run it 24/7 with systemd
 ```bash
@@ -77,9 +81,10 @@ journalctl -u dnhcare-bot -f               # live logs
 ```
 
 ## Daily use (all in Telegram)
-- A draft arrives every day at `POST_TIME` — **✅ Approve** publishes; **✏️ Reject** then
-  reply with your changes and it rewrites.
-- `/generate` — draft right now.
+- Every day, at a fresh random minute inside your `/settime` window, a post is drafted
+  and — if it passes the safety gate — published automatically (blog + Google Business
+  Profile). You get a Telegram message once it's live; no approval needed.
+- `/generate` — draft and auto-publish right now, outside the daily schedule.
 - `/topics` — see the queue.
 - `/addtopic [Skin] Why winter worsens eczema` — queue a topic.
 - `/model` shows the current writing model; `/models` lists Cloudflare's live model catalog,
@@ -88,10 +93,12 @@ journalctl -u dnhcare-bot -f               # live logs
 - When the queue runs low it auto-picks a timely, healthcare-relevant topic.
 
 ## Notes
-- The agent only ever **commits on approval** — nothing is published without your tap.
-- Every draft must pass `agent/check_post.py` (no medical overclaims, disclaimer + author +
-  schema present, ≥380 words) before it's even shown to you.
-- To change the daily time: edit `POST_TIME` in `.env`, then `sudo systemctl restart dnhcare-bot`.
+- **No manual approval step.** The deterministic safety gate (`agent/check_post.py` —
+  no medical overclaims, no remedy names, disclaimer + author + schema present, ≥380
+  words) is the only check before a draft goes live. A gate failure blocks publishing;
+  a pass publishes immediately.
+- To change the daily window: `/settime 06:00-09:00` in Telegram (or edit
+  `POST_WINDOW_START`/`POST_WINDOW_END` in `.env`, then `sudo systemctl restart dnhcare-bot`).
 - Cost: content is generated via Cloudflare Workers AI's free tier by default
   (llama-3.3-70b-instruct-fp8-fast etc.), so ~free; switch to any other Cloudflare
   model anytime with `/setmodel`.

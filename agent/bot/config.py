@@ -67,7 +67,9 @@ GITHUB_TOKEN = _env("DNH_GitHub_Token", "DNH_Github_Token", "DNH_GITHUB_TOKEN",
                     "GITHUB_TOKEN", required=True)
 GITHUB_REPO = _env("GITHUB_REPO", default="shafeequealipt-dotcom/DNHCare")
 REPO_DIR = _env("REPO_DIR", required=True)
-POST_TIME = _env("POST_TIME", default="06:00")  # default/seed; live value lives in state.json
+POST_TIME = _env("POST_TIME", default="06:00")  # legacy fallback if state.json has no window
+POST_WINDOW_START = _env("POST_WINDOW_START", default="06:00")
+POST_WINDOW_END = _env("POST_WINDOW_END", default="09:00")
 # Weekly GBP performance digest — day (0=Mon..6=Sun) and time (IST). Static env,
 # no /set command yet; edit .env + restart to change.
 REPORT_DAY = int(_env("REPORT_DAY", default="0"))
@@ -186,20 +188,39 @@ def get_gbp_posts(n: int = 5) -> list:
     return _read_state().get("gbp_posts", [])[:n]
 
 
-# ---- daily post time (switchable from Telegram), persisted ----
-def get_post_time() -> str:
-    return _read_state().get("post_time", POST_TIME)
-
-
-def set_post_time(hhmm: str) -> str:
-    """Validate and persist an HH:MM (24h IST) post time. Returns the normalized value."""
-    h_str, _, m_str = hhmm.strip().partition(":")
+# ---- daily post WINDOW (switchable from Telegram), persisted ----
+# The bot picks a fresh random minute inside this window each day (see
+# bot._schedule_next_daily) rather than posting at one fixed time — avoids a
+# detectable exact-time daily pattern on the site / GBP listing.
+def _parse_hhmm(s: str) -> str:
+    h_str, _, m_str = s.strip().partition(":")
     h, m = int(h_str), int(m_str)
     if not (0 <= h < 24 and 0 <= m < 60):
         raise ValueError("time must be 00:00–23:59")
-    val = f"{h:02d}:{m:02d}"
+    return f"{h:02d}:{m:02d}"
+
+
+def get_post_window() -> tuple:
+    """Returns (start, end) as "HH:MM" strings."""
     state = _read_state()
-    state["post_time"] = val
+    win = state.get("post_window")
+    if win and "start" in win and "end" in win:
+        return win["start"], win["end"]
+    # legacy single-time state (pre-window) still honored as a zero-width window
+    legacy = state.get("post_time")
+    if legacy:
+        return legacy, legacy
+    return POST_WINDOW_START, POST_WINDOW_END
+
+
+def set_post_window(start: str, end: str) -> tuple:
+    """Validate and persist the daily post window. Returns the normalized (start, end)."""
+    start_v, end_v = _parse_hhmm(start), _parse_hhmm(end)
+    if start_v > end_v:
+        raise ValueError("window start must be before end")
+    state = _read_state()
+    state["post_window"] = {"start": start_v, "end": end_v}
+    state.pop("post_time", None)  # drop any legacy single-time value
     with open(STATE_FILE, "w", encoding="utf-8") as f:
         json.dump(state, f)
-    return val
+    return start_v, end_v

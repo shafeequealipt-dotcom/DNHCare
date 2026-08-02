@@ -24,7 +24,7 @@ READ THIS FILE ALONE = KNOW EVERYTHING. PUSH TO GITHUB. DONE.
     literal fallback path = "/Users/naash/Documents/Projects/Personal-2/Orcale/NEW KEYS/ssh-key-2026-07-22.key".
     venv = /home/ubuntu/dnhvenv ; secrets = /home/ubuntu/DNHCare/agent/bot/.env (chmod 600).
     service = dnhcare-bot (systemd, enabled=survives reboot). manage: `sudo systemctl {status|restart|stop} dnhcare-bot` ; logs `journalctl -u dnhcare-bot -f`.
-    config: PUBLISH_BRANCH=main, POST_TIME=06:00 IST, model=@cf/meta/llama-3.3-70b-instruct-fp8-fast
+    config: PUBLISH_BRANCH=main, POST_WINDOW=06:00-09:00 IST (randomized daily), model=@cf/meta/llama-3.3-70b-instruct-fp8-fast
     (Cloudflare Workers AI), token=DNH_GitHub_Token (fine-grained PAT, Contents:R/W).
 - LOCAL bot = STOPPED (Oracle is the only instance). RUN ONLY ONE BOT (same Telegram token -> 409).
 - GOTCHA hit during deploy: fine-grained PAT needs **Contents: Read AND write** + the repo selected under "Only select repositories".
@@ -38,8 +38,9 @@ AUTO-DEPLOY via GitHub Actions (secrets: ORACLE_SSH_KEY, ORACLE_HOST):
   push to development -> .github/workflows/deploy-staging.yml    -> ssh pulls ~/DNHCare-staging
   push/merge to main  -> .github/workflows/deploy-production.yml -> ssh pulls ~/DNHCare
 
-BOT FLOW (2026-06-19):
-  bot generates post -> Approve in Telegram -> pushes to main -> deploy-production.yml -> dnhcare.co.in live in ~15s
+BOT FLOW (2026-06-19; AUTO-PUBLISH since 2026-07-27 — no Telegram approval):
+  bot generates post -> passes agent/check_post.py gate -> auto-publishes (pushes to main)
+  -> deploy-production.yml -> dnhcare.co.in live in ~15s. No human tap in the loop.
   staging.dnhcare.co.in = used for manual dev/design changes (push to development branch)
 
 NGINX on Oracle (already installed + active):
@@ -109,8 +110,10 @@ trick = canvas image-sequence scrub.
   link to the matching service page. keep ~600-900 words, real local value, original.
 
 ## DAILY AGENT  (Python + Telegram bot on Oracle — BUILT on development)
-- GOAL = 1 new post/day INTO /blog/, DRAFT only -> sent to Telegram with Approve/Reject ->
-  on Approve the bot commits to main -> GitHub Pages auto-deploys. Approval happens IN TELEGRAM.
+- GOAL = 1 new post/day INTO /blog/, auto-generated -> agent/check_post.py gate -> if it
+  passes, AUTO-PUBLISHED (no Telegram approval since 2026-07-27). Bot commits to main ->
+  GitHub Actions auto-deploys, and shares to Google Business Profile. Telegram is
+  status/control only (/generate, /topics, /settime, /gbp, /report, /model...), not a gate.
 - ARCHITECTURE = standing Python service on the user's Oracle Cloud VM (systemd), long-polling Telegram.
 - LLM PROVIDER = **Cloudflare Workers AI** (OpenAI-compatible), NOT Anthropic. Switched from
   Groq 2026-07-16 (env: DNH_CloudFlare_API + DNH_CloudFlare_AccountID). Model is
@@ -136,9 +139,13 @@ trick = canvas image-sequence scrub.
     topics.py    = read/add/consume agent/topics.md; autoselect_viral_topic() = date-aware Cloudflare call (no web tool).
     content.py   = Cloudflare (current model) returns JSON -> robust parse -> Pydantic Post; Python assembles the post
                    HTML deterministically (schema/disclaimer/author/canonical/CTA always present).
-    publisher.py = sync main, stage draft, run gate, on approve: insert blog index card + sitemap loc + mark topic done + git commit/push main.
-    bot.py       = telegram bot: JobQueue daily at POST_TIME (IST); /generate /topics /addtopic /model /models /setmodel;
-                   Approve/Reject buttons; Reject->reply feedback->regenerate.
+    publisher.py = sync main, stage draft, run gate, on gate-pass: insert blog index card + sitemap loc + mark topic done + git commit/push main.
+    bot.py       = telegram bot: JobQueue self-reschedules a fresh RANDOM minute inside
+                   POST_WINDOW_START..END (IST) every day (config.get_post_window /
+                   _pick_random_slot / _schedule_next_daily) — avoids a fixed detectable
+                   daily post time. Auto-publishes on gate-pass, no approval buttons.
+                   /generate /topics /addtopic /model /models /setmodel /gbp /report
+                   /time /settime HH:MM-HH:MM.
     check_post.py (in /agent/) = the deterministic gate, run on every draft before it's shown.
     deploy/dnhcare-bot.service + SETUP-ORACLE.md = systemd unit + full Oracle deploy guide.
 - CHECK_POST GATE (agent/check_post.py) blocks a draft if ANY of:
@@ -148,7 +155,7 @@ trick = canvas image-sequence scrub.
     canonical, scroll-progress, footer NAP, WhatsApp CTA); no internal service-page link
     (clean URL, no .html); body < 380 words; missing/too-short title or meta description.
 - GOOGLE BUSINESS PROFILE AUTO-POST (LIVE since 2026-07-07; all 5 env vars set on Oracle):
-    on ✅ Approve, after the blog publishes, bot ALSO creates a GBP local post.
+    on every auto-publish, after the blog publishes, bot ALSO creates a GBP local post.
     GBP failure never blocks the blog.
     STYLE (2026-07-08): gbp_summary = informative MINI-ARTICLE (4-6 sentences,
           600-1200 chars, keyword+locality in FIRST sentence — only ~100 chars show
@@ -199,7 +206,7 @@ trick = canvas image-sequence scrub.
     Telegram = SYSTEM env vars DNH_Telegram_Token + DNH_Telegram_ID (already set on user's Windows machine; export on the VM).
     DNH_CloudFlare_API + DNH_CloudFlare_AccountID = system env (already set) or .env.
     DNH_GitHub_Token (fine-grained PAT, Contents:RW on DNHCare) = system env or .env.
-    in agent/bot/.env: REPO_DIR, POST_TIME, optional DEFAULT_MODEL.
+    in agent/bot/.env: REPO_DIR, POST_WINDOW_START/END, optional DEFAULT_MODEL.
 - IMPORTANT = bot REPO_DIR = /home/ubuntu/DNHCare-staging (development branch). Bot pushes to development.
   GitHub Actions deploy-staging.yml auto-pulls staging. User merges dev->main -> deploy-production.yml auto-pulls production.
 - TESTED locally: modules compile; live Cloudflare generation produced a valid post that PASSED

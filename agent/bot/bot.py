@@ -1,16 +1,20 @@
-"""DNH Care daily blog agent — Telegram-controlled, draft -> approve -> publish.
+"""DNH Care daily blog agent — Telegram-controlled, fully automated: draft,
+safety gate, publish (blog + Google Business Profile). No manual approval step;
+Telegram is used for status/control (/generate, /gbp, /report, /settime, etc.),
+not for gating what goes live.
 
 Run:  python -m agent.bot.bot        (from the repo root, with .env present)
 """
 import asyncio
 import datetime
 import logging
+import random
 from zoneinfo import ZoneInfo
 
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.constants import ParseMode
 from telegram.ext import (Application, CommandHandler, CallbackQueryHandler,
-                          MessageHandler, ContextTypes, filters)
+                          ContextTypes)
 
 from . import config, content, gbp, insights, publisher, topics
 
@@ -19,8 +23,6 @@ logging.basicConfig(level=logging.INFO,
 log = logging.getLogger("dnhcare-bot")
 
 IST = ZoneInfo("Asia/Kolkata")
-# Single in-flight draft (one clinic, one editor). {topic, post, html, awaiting_feedback}
-PENDING: dict = {}
 # Topics suggested by the last weekly GBP digest, keyed by the index shown in the
 # message so an "Add" button tap can look the text back up.
 PENDING_TOPICS: dict = {}
@@ -29,13 +31,6 @@ PENDING_TOPICS: dict = {}
 def _only_owner(update: Update) -> bool:
     chat = update.effective_chat
     return chat is not None and chat.id == config.TELEGRAM_CHAT_ID
-
-
-def _kb():
-    return InlineKeyboardMarkup([[
-        InlineKeyboardButton("✅ Approve & publish", callback_data="approve"),
-        InlineKeyboardButton("✏️ Reject", callback_data="reject"),
-    ]])
 
 
 def _preview(post) -> str:
@@ -79,7 +74,37 @@ def _generate_blocking(topic: str | None, feedback: str = ""):
     return {"topic": topic, "post": post, "html": html, "ok": ok, "gate": out, "auto": auto_note}
 
 
+async def _publish_and_notify(context: ContextTypes.DEFAULT_TYPE, post, html, topic):
+    """Publish the blog post, then (isolated — a GBP failure never affects the
+    already-published blog) share it to the clinic's Google Business Profile."""
+    chat_id = config.TELEGRAM_CHAT_ID
+    await context.bot.send_message(chat_id, "📤 Publishing…")
+    try:
+        url = await asyncio.to_thread(publisher.publish, post, html, topic)
+    except Exception as e:  # noqa
+        log.exception("publish failed")
+        await context.bot.send_message(chat_id, f"⚠️ Publish failed: {e}")
+        return
+    await context.bot.send_message(chat_id, f"✅ Published — live in ~1–2 min:\n{url}")
+    if gbp.is_enabled():
+        clean_url = f"https://dnhcare.co.in/blog/{post.slug}"
+        try:
+            gbp_name = await asyncio.to_thread(
+                gbp.create_local_post, content.gbp_blurb(post), clean_url)
+            config.record_gbp_post(post.title, gbp_name)
+            await context.bot.send_message(
+                chat_id, "📍 Also posted to the clinic's Google Business Profile.")
+        except Exception as e:  # noqa
+            log.exception("GBP post failed")
+            await context.bot.send_message(
+                chat_id, f"⚠️ Blog is live, but the Google Business Profile post "
+                        f"failed: {e}\n(/gbp off silences this until fixed.)")
+
+
 async def generate_and_send(context: ContextTypes.DEFAULT_TYPE, topic=None, feedback=""):
+    """Generate a draft and, if it passes the safety gate, publish it immediately —
+    no manual Telegram approval step. The gate (agent/check_post.py) is the only
+    check before content goes live; a gate failure still stops publication."""
     chat_id = config.TELEGRAM_CHAT_ID
     await context.bot.send_message(chat_id, "✍️ Writing today's draft… (~1 min)")
     try:
@@ -95,13 +120,11 @@ async def generate_and_send(context: ContextTypes.DEFAULT_TYPE, topic=None, feed
                      f"<pre>{res['gate']}</pre>\nSend /generate to try a fresh topic.",
             parse_mode=ParseMode.HTML)
         return
-    PENDING.clear()
-    PENDING.update({"topic": res["topic"], "post": res["post"],
-                    "html": res["html"], "awaiting_feedback": False})
     note = (f"🌶️ Auto-picked a trending topic: <i>{res['auto']}</i>\n\n"
             if res["auto"] else "")
     await context.bot.send_message(chat_id, note + _preview(res["post"]),
-                                   parse_mode=ParseMode.HTML, reply_markup=_kb())
+                                   parse_mode=ParseMode.HTML)
+    await _publish_and_notify(context, res["post"], res["html"], res["topic"])
 
 
 # ---------------- handlers ----------------
@@ -111,9 +134,12 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     await update.message.reply_text(
         "DNH Care blog agent.\n\n"
-        "Every day I draft a post and send it here for your approval.\n\n"
+        "Every day I draft a post and, if it passes the safety gate, publish it "
+        "automatically — blog + Google Business Profile. No approval tap needed; "
+        "I'll message you here once it's live. The posting time varies daily "
+        "within your set window (see /time).\n\n"
         "Commands:\n"
-        "/generate – write a draft now\n"
+        "/generate – write and auto-publish a post right now\n"
         "/topics – show the topic queue\n"
         "/addtopic <topic> – add a topic to the queue\n"
         "/model – show the current writing model\n"
@@ -123,42 +149,71 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "/gbp cta call | learn\n"
         "/report – GBP weekly performance + search-keyword digest, on demand "
         "(also sent automatically)\n"
-        "/time – show the daily post time\n"
-        "/settime HH:MM – set the daily post time (IST)\n"
+        "/time – show the daily post window + next scheduled run\n"
+        "/settime HH:MM-HH:MM – set the daily post window (IST)\n"
         "/prompt – show the content-generation prompt\n"
-        "/setprompt <text> – update the prompt (also editable on GitHub)\n\n"
-        "On each draft: ✅ Approve publishes it live; ✏️ Reject lets you reply with "
-        "changes and I'll rewrite.")
+        "/setprompt <text> – update the prompt (also editable on GitHub)")
 
 
-def _schedule_daily(job_queue):
-    """(Re)schedule the daily post job from the persisted time. Returns the time string."""
+def _pick_random_slot() -> datetime.datetime:
+    """Pick a fresh random minute inside the configured window, for today if that
+    moment hasn't passed yet (with a 2-min safety buffer), otherwise tomorrow.
+    A new random minute is drawn every time this is called — the daily posting
+    time deliberately varies day to day rather than landing on a fixed minute."""
+    start_s, end_s = config.get_post_window()
+    sh, sm = (int(x) for x in start_s.split(":"))
+    eh, em = (int(x) for x in end_s.split(":"))
+    start_minutes = sh * 60 + sm
+    end_minutes = max(eh * 60 + em, start_minutes)  # zero-width window still valid
+    chosen = random.randint(start_minutes, end_minutes)
+    ch, cm = divmod(chosen, 60)
+
+    now = datetime.datetime.now(IST)
+    candidate = now.replace(hour=ch, minute=cm, second=0, microsecond=0)
+    if candidate <= now + datetime.timedelta(minutes=2):
+        candidate += datetime.timedelta(days=1)
+    return candidate
+
+
+def _schedule_next_daily(job_queue):
+    """(Re)schedule the next daily post as a one-shot run at a freshly-randomized
+    time (see _pick_random_slot). Called at bot startup and again at the start of
+    every daily_job run, so tomorrow's slot is always queued regardless of how
+    today's run goes. Returns the scheduled datetime."""
     for j in job_queue.get_jobs_by_name("daily_post"):
         j.schedule_removal()
-    val = config.get_post_time()
-    hh, mm = (int(x) for x in val.split(":"))
-    job_queue.run_daily(daily_job, time=datetime.time(hh, mm, tzinfo=IST), name="daily_post")
-    return val
+    when = _pick_random_slot()
+    job_queue.run_once(daily_job, when=when, name="daily_post")
+    return when
 
 
 async def cmd_time(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not _only_owner(update):
         return
-    await update.message.reply_text(f"Daily post time: {config.get_post_time()} IST")
+    start, end = config.get_post_window()
+    jobs = context.job_queue.get_jobs_by_name("daily_post")
+    next_run = jobs[0].next_t.astimezone(IST).strftime("%Y-%m-%d %H:%M") if jobs else "not scheduled"
+    await update.message.reply_text(
+        f"Daily post window: {start}–{end} IST (a new random minute is picked "
+        f"inside it each day).\nNext run: {next_run} IST")
 
 
 async def cmd_settime(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not _only_owner(update):
         return
-    arg = " ".join(context.args).strip()
+    args = " ".join(context.args).strip()
+    start, _, end = args.partition("-")
     try:
-        val = config.set_post_time(arg)
+        if not start or not end:
+            raise ValueError("need start-end")
+        val_start, val_end = config.set_post_window(start, end)
     except Exception:  # noqa
-        await update.message.reply_text("Usage: /settime 06:30   (24-hour, IST)")
+        await update.message.reply_text("Usage: /settime 06:00-09:00   (24-hour, IST)")
         return
-    _schedule_daily(context.job_queue)
-    await update.message.reply_text(f"Daily post time set to {val} IST. "
-                                    "A draft will arrive then each day.")
+    when = _schedule_next_daily(context.job_queue)
+    await update.message.reply_text(
+        f"Daily post window set to {val_start}–{val_end} IST.\n"
+        f"Next run: {when.strftime('%Y-%m-%d %H:%M')} IST")
 
 
 async def cmd_prompt(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -284,8 +339,8 @@ async def cmd_gbp(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         f"Google Business Profile auto-post is {state}.\n"
         f"CTA button: {cta_desc}\n\n"
-        "On ✅ Approve, the blog is published AND shared to the clinic's Google "
-        "listing.\nToggle with /gbp on | /gbp off.\n"
+        "On every auto-publish, the blog post is shared to the clinic's Google "
+        "listing too.\nToggle with /gbp on | /gbp off.\n"
         "Switch button with /gbp cta call | /gbp cta learn.")
 
 
@@ -318,6 +373,9 @@ async def cmd_addtopic(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def on_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handles the two remaining button types: model picker (/models) and
+    suggested-topic add (/report). Posts no longer wait for a button — they
+    auto-publish as soon as they pass the safety gate (see generate_and_send)."""
     q = update.callback_query
     await q.answer()
     if q.message.chat.id != config.TELEGRAM_CHAT_ID:
@@ -338,64 +396,12 @@ async def on_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
         added = topics.add_topic(topic)
         await context.bot.send_message(config.TELEGRAM_CHAT_ID,
                                        f"Added to the queue:\n{added}")
-        return
-    if not PENDING.get("post"):
-        await q.edit_message_reply_markup(reply_markup=None)
-        await context.bot.send_message(config.TELEGRAM_CHAT_ID,
-                                       "That draft expired. Send /generate for a new one.")
-        return
-    if q.data == "approve":
-        await q.edit_message_reply_markup(reply_markup=None)
-        await context.bot.send_message(config.TELEGRAM_CHAT_ID, "📤 Publishing…")
-        try:
-            url = await asyncio.to_thread(publisher.publish, PENDING["post"],
-                                          PENDING["html"], PENDING["topic"])
-        except Exception as e:  # noqa
-            log.exception("publish failed")
-            await context.bot.send_message(config.TELEGRAM_CHAT_ID, f"⚠️ Publish failed: {e}")
-            return
-        post = PENDING["post"]
-        PENDING.clear()
-        await context.bot.send_message(
-            config.TELEGRAM_CHAT_ID,
-            f"✅ Published — live in ~1–2 min:\n{url}")
-        # Also share on the clinic's Google Business Profile (isolated: a GBP
-        # failure never affects the already-published blog post).
-        if gbp.is_enabled():
-            clean_url = f"https://dnhcare.co.in/blog/{post.slug}"
-            try:
-                gbp_name = await asyncio.to_thread(
-                    gbp.create_local_post, content.gbp_blurb(post), clean_url)
-                config.record_gbp_post(post.title, gbp_name)
-                await context.bot.send_message(
-                    config.TELEGRAM_CHAT_ID,
-                    "📍 Also posted to the clinic's Google Business Profile.")
-            except Exception as e:  # noqa
-                log.exception("GBP post failed")
-                await context.bot.send_message(
-                    config.TELEGRAM_CHAT_ID,
-                    f"⚠️ Blog is live, but the Google Business Profile post "
-                    f"failed: {e}\n(/gbp off silences this until fixed.)")
-    elif q.data == "reject":
-        PENDING["awaiting_feedback"] = True
-        await q.edit_message_reply_markup(reply_markup=None)
-        await context.bot.send_message(
-            config.TELEGRAM_CHAT_ID,
-            "✏️ Reply with the changes you want and I'll rewrite the post.")
-
-
-async def on_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if not _only_owner(update):
-        return
-    if PENDING.get("awaiting_feedback"):
-        feedback = update.message.text.strip()
-        topic = PENDING.get("topic")
-        publisher.discard(PENDING.get("post").slug)
-        PENDING.clear()
-        await generate_and_send(context, topic=topic, feedback=feedback)
 
 
 async def daily_job(context: ContextTypes.DEFAULT_TYPE):
+    # Reschedule tomorrow's (freshly randomized) slot FIRST, so a next run is
+    # always queued even if today's generation fails or the process crashes.
+    _schedule_next_daily(context.job_queue)
     await generate_and_send(context)
 
 
@@ -458,13 +464,12 @@ def main():
     app.add_handler(CommandHandler("prompt", cmd_prompt))
     app.add_handler(CommandHandler("setprompt", cmd_setprompt))
     app.add_handler(CallbackQueryHandler(on_button))
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, on_text))
 
-    val = _schedule_daily(app.job_queue)
+    when = _schedule_next_daily(app.job_queue)
     if gbp.is_configured():
         _schedule_weekly_report(app.job_queue)
-    log.info("DNH Care bot started. Daily post at %s IST. Publishing to '%s'.",
-             val, config.PUBLISH_BRANCH)
+    log.info("DNH Care bot started. Next auto-post at %s IST. Publishing to '%s'.",
+             when.strftime("%Y-%m-%d %H:%M"), config.PUBLISH_BRANCH)
     app.run_polling(allowed_updates=Update.ALL_TYPES)
 
 
