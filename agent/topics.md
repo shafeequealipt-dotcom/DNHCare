@@ -13,6 +13,7 @@ Bengaluru). Keep each post original, locally useful, and tied to a service page.
 
 
 ## Done (most recent first)
+- 2026-08-04 [Children] Homeopathic Approaches to Managing Monsoon-Triggered Motion Sickness in Kids: Tips for Car Rides, Bus Journeys, and Other Forms of Travel During Bengaluru's Rainy Season  -> homeopathy-for-motion-sickness-in-kids-bengaluru.html
 - 2026-08-04 [Migraine] The Impact of Monsoon-Induced Disruptions to Daily Routines on Migraine Patterns in Bengaluru: A Homeopathic Exploration of Lifestyle Modifications for Relief.  -> migraine-relief-in-bengaluru-monsoon-disruptions.html
 - 2026-08-03 [Skin] Monsoon-Induced Folliculitis: Homeopathic Remedies and Self-Care Tips for Managing Ingrown Hairs and Infected Hair Follicles in Bengaluru's Humid Climate.  -> folliculitis-treatment-bengaluru.html
 - 2026-08-02 [Women] Navigating Monsoon-Triggered Adrenal Fatigue in Women: A Homeopathic Perspective on Stress Resilience and Hormonal Balance During Bengaluru's Rainy Season  -> monsoon-adrenal-fatigue-women-bengaluru.html
