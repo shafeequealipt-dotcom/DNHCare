@@ -13,6 +13,7 @@ Bengaluru). Keep each post original, locally useful, and tied to a service page.
 
 
 ## Done (most recent first)
+- 2026-08-05 [Skin] Homeopathic Insights into the Impact of Monsoon-Induced Water Pollution on Skin Health in Bengaluru: A Guide to Safe Water Practices and Remedies.  -> monsoon-skin-care-in-bengaluru.html
 - 2026-08-05 [Women] Homeopathic Perspectives on Managing Polycystic Ovary Syndrome (PCOS) Symptoms Exacerbated by Monsoon-Related Hormonal Fluctuations in Bengaluru.  -> pcos-symptoms-bengaluru-homeopathic-management.html
 - 2026-08-04 [Allergies] Unraveling the Monsoon-Induced Intensification of Food Allergies in Bengaluru: A Homeopathic Exploration of Dietary Triggers and Relief Strategies.  -> monsoon-food-allergies-bengaluru-homeopathy.html
 - 2026-08-04 [Children] Homeopathic Approaches to Managing Monsoon-Triggered Motion Sickness in Kids: Tips for Car Rides, Bus Journeys, and Other Forms of Travel During Bengaluru's Rainy Season  -> homeopathy-for-motion-sickness-in-kids-bengaluru.html
