@@ -13,6 +13,7 @@ Bengaluru). Keep each post original, locally useful, and tied to a service page.
 
 
 ## Done (most recent first)
+- 2026-08-08 [Skin] Homeopathic Approaches to Managing Monsoon-Exacerbated Keratosis Pilaris: Gentle Exfoliation Techniques and Natural Remedies for Smoother Skin in Bengaluru's Humid Climate.  -> homeopathic-approaches-to-managing-keratosis-pilaris-in-bengaluru.html
 - 2026-08-07 [Allergies] Uncovering the Impact of Monsoon-Triggered Indoor Air Pollution on Respiratory Allergies in Bengaluru: A Homeopathic Exploration of Ventilation Strategies and Remedies.  -> monsoon-allergies-bengaluru-homeopathy.html
 - 2026-08-06 [Migraine] Navigating Monsoon-Triggered Weather Sensitivity: A Homeopathic Exploration of How Bengaluru's Rainy Season Affects Migraine Patterns in Individuals with Sensory Processing Sensitivity.  -> migraine-homeopathy-bengaluru-monsoon.html
 - 2026-08-05 [Children] Homeopathic Guidance for Parents: Navigating the Impact of Monsoon-Related Power Outages on Children's Sleep Patterns and Emotional Wellbeing in Bengaluru.  -> monsoon-sleep-solutions-for-kids-in-bengaluru.html
