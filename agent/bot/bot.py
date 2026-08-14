@@ -435,6 +435,38 @@ def _schedule_weekly_report(job_queue):
                         days=(config.REPORT_DAY,), name="weekly_gbp_report")
 
 
+WATCHDOG_INTERVAL_SECONDS = 3 * 60 * 60  # check every 3h
+
+
+async def _scheduling_watchdog(context: ContextTypes.DEFAULT_TYPE):
+    """Safety net for the daily-post self-rescheduling chain. daily_job() is the
+    ONLY place that queues tomorrow's slot — if it ever fails to run (a
+    scheduler misfire, an unhandled exception, the job getting removed some
+    other way) nothing else would notice, and auto-posting silently stops
+    forever with no error and no alert. This runs on a fixed interval
+    (independent of the fragile chain) and re-queues + alerts if the
+    daily_post job has gone missing."""
+    jobs = context.job_queue.get_jobs_by_name("daily_post")
+    if jobs:
+        return  # healthy — a slot is queued, nothing to do
+    log.warning("scheduling watchdog: no daily_post job found — rescheduling now")
+    when = _schedule_next_daily(context.job_queue)
+    try:
+        await context.bot.send_message(
+            config.TELEGRAM_CHAT_ID,
+            "⚠️ Auto-post scheduling had silently stopped (no post was queued) — "
+            f"I've fixed it.\nNext auto-post: {when.strftime('%Y-%m-%d %H:%M')} IST.")
+    except Exception:  # noqa
+        log.exception("watchdog: failed to send the recovery alert")
+
+
+def _schedule_watchdog(job_queue):
+    for j in job_queue.get_jobs_by_name("scheduling_watchdog"):
+        j.schedule_removal()
+    job_queue.run_repeating(_scheduling_watchdog, interval=WATCHDOG_INTERVAL_SECONDS,
+                            first=120, name="scheduling_watchdog")
+
+
 async def cmd_report(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not _only_owner(update):
         return
@@ -447,8 +479,19 @@ async def cmd_report(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await _send_gbp_digest(context)
 
 
+async def _on_error(update: object, context: ContextTypes.DEFAULT_TYPE):
+    """Global handler so unexpected exceptions (e.g. a transient Telegram
+    Conflict/NetworkError from getUpdates) are logged cleanly instead of PTB's
+    default "No error handlers are registered" noise. Deliberately does not
+    message the user here — Telegram itself may be the thing failing; the
+    scheduling watchdog is the mechanism that actually alerts on the one
+    failure mode (silent auto-post stoppage) that matters most."""
+    log.error("Unhandled exception", exc_info=context.error)
+
+
 def main():
     app = Application.builder().token(config.TELEGRAM_BOT_TOKEN).build()
+    app.add_error_handler(_on_error)
     app.add_handler(CommandHandler("start", cmd_start))
     app.add_handler(CommandHandler("help", cmd_start))
     app.add_handler(CommandHandler("generate", cmd_generate))
@@ -466,6 +509,7 @@ def main():
     app.add_handler(CallbackQueryHandler(on_button))
 
     when = _schedule_next_daily(app.job_queue)
+    _schedule_watchdog(app.job_queue)
     if gbp.is_configured():
         _schedule_weekly_report(app.job_queue)
     log.info("DNH Care bot started. Next auto-post at %s IST. Publishing to '%s'.",
