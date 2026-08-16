@@ -13,6 +13,7 @@ Bengaluru). Keep each post original, locally useful, and tied to a service page.
 
 
 ## Done (most recent first)
+- 2026-08-16 [Women] Homeopathic Perspectives on Managing Menstrual Irregularities Induced by Monsoon-Related Travel Disruptions and Lifestyle Changes in Bengaluru.  -> menstrual-irregularities-bengaluru-women.html
 - 2026-08-15 [Children] Homeopathic Strategies for Supporting Kids' Emotional Resilience During Bengaluru's Monsoon-Induced Power Outages and Internet Disruptions: Tips for Parents to Foster Calm and Productivity.  -> children-emotional-resilience-bengaluru.html
 - 2026-08-08 [Skin] Homeopathic Approaches to Managing Monsoon-Exacerbated Keratosis Pilaris: Gentle Exfoliation Techniques and Natural Remedies for Smoother Skin in Bengaluru's Humid Climate.  -> homeopathic-approaches-to-managing-keratosis-pilaris-in-bengaluru.html
 - 2026-08-07 [Allergies] Uncovering the Impact of Monsoon-Triggered Indoor Air Pollution on Respiratory Allergies in Bengaluru: A Homeopathic Exploration of Ventilation Strategies and Remedies.  -> monsoon-allergies-bengaluru-homeopathy.html
