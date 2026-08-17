@@ -13,6 +13,7 @@ Bengaluru). Keep each post original, locally useful, and tied to a service page.
 
 
 ## Done (most recent first)
+- 2026-08-17 [Migraine] Monsoon-Triggered Temporomandibular Joint (TMJ) Disorders and Their Connection to Migraine Episodes: A Homeopathic Exploration of Jaw Health and Relief Strategies in Bengaluru.  -> migraine-tmj-disorders-bengaluru.html
 - 2026-08-17 [Skin] Homeopathic Solutions for Monsoon-Exacerbated Maskne: Managing Acne and Skin Irritation Caused by Prolonged Mask-Wearing in Bengaluru's Humid Climate.  -> homeopathy-for-maskne-in-bengaluru.html
 - 2026-08-16 [Women] Homeopathic Perspectives on Managing Menstrual Irregularities Induced by Monsoon-Related Travel Disruptions and Lifestyle Changes in Bengaluru.  -> menstrual-irregularities-bengaluru-women.html
 - 2026-08-15 [Children] Homeopathic Strategies for Supporting Kids' Emotional Resilience During Bengaluru's Monsoon-Induced Power Outages and Internet Disruptions: Tips for Parents to Foster Calm and Productivity.  -> children-emotional-resilience-bengaluru.html
