@@ -13,6 +13,7 @@ Bengaluru). Keep each post original, locally useful, and tied to a service page.
 
 
 ## Done (most recent first)
+- 2026-08-19 [Skin] Homeopathic Remedies for Monsoon-Exacerbated Dandruff and Scalp Irritation in Bengaluru: A Comprehensive Guide to Natural Shampoos and Scalp Care.  -> homeopathy-for-dandruff-in-bengaluru.html
 - 2026-08-19 [Women] Homeopathic Approaches to Managing Monsoon-Exacerbated Endometriosis Symptoms in Bengaluru: A Comprehensive Guide to Pain Relief and Hormonal Balance.  -> homeopathy-for-endometriosis-in-bengaluru.html
 - 2026-08-18 [Children] Homeopathic Approaches to Mitigating the Impact of Monsoon-Related Screen Time on Kids' Eye Health and Vision Development in Bengaluru.  -> monsoon-screen-time-homeopathy-kids-eye-health-bengaluru.html
 - 2026-08-17 [Allergies] Exploring the Homeopathic Connection Between Monsoon-Triggered Silicone Allergy and Skin Irritation in Bengaluru's Cosmetic Users.  -> monsoon-silicone-allergy-relief-bengaluru.html
