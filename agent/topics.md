@@ -13,6 +13,7 @@ Bengaluru). Keep each post original, locally useful, and tied to a service page.
 
 
 ## Done (most recent first)
+- 2026-08-21 [Migraine] Uncovering the Relationship Between Monsoon-Triggered Changes in Gut Microbiome and Migraine Episodes in Bengaluru: A Homeopathic Exploration of Dietary Interventions and Relief Strategies.  -> migraine-homeopathy-bengaluru-monsoon-relief.html
 - 2026-08-20 [Children] Homeopathic Approaches to Supporting Kids' Mental Health During Bengaluru's Monsoon-Induced Isolation from Outdoor Activities: Strategies for Indoor Play and Socialization.  -> homeopathy-for-kids-mental-health-in-bengaluru-monsoon.html
 - 2026-08-20 [Children] Homeopathic Strategies for Supporting Siblings of Children with Monsoon-Exacerbated Chronic Conditions: Fostering Emotional Resilience and Inclusivity in Bengaluru Families.  -> homeopathy-for-siblings-of-children-with-chronic-conditions-in-bengalu.html
 - 2026-08-19 [Skin] Homeopathic Remedies for Monsoon-Exacerbated Dandruff and Scalp Irritation in Bengaluru: A Comprehensive Guide to Natural Shampoos and Scalp Care.  -> homeopathy-for-dandruff-in-bengaluru.html
