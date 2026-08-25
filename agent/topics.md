@@ -13,6 +13,7 @@ Bengaluru). Keep each post original, locally useful, and tied to a service page.
 
 
 ## Done (most recent first)
+- 2026-08-25 [Skin] The Impact of Monsoon-Induced Fungal Infections on Nail Health: A Homeopathic Perspective on Prevention and Treatment of Onychomycosis in Bengaluru's Humid Climate.  -> homeopathy-for-onychomycosis-in-bengaluru.html
 - 2026-08-25 [Women] Exploring the Homeopathic Connection between Monsoon-Related Thyroid Hormone Fluctuations and Menstrual Cycle Irregularities in Bengaluru: A Comprehensive Guide to Hormonal Balance and Wellness.  -> homeopathy-for-thyroid-and-menstrual-issues-in-bengaluru.html
 - 2026-08-25 [Allergies] Uncovering the Hidden Link Between Monsoon-Triggered Stress and Histamine Intolerance: A Homeopathic Perspective on Managing Allergic Reactions in Bengaluru's Rainy Season  -> monsoon-allergies-homeopathy-bengaluru.html
 - 2026-08-24 [Children] Homeopathic Approaches to Supporting Siblings of Children with Monsoon-Exacerbated Special Needs: Fostering Emotional Resilience and Inclusive Family Dynamics in Bengaluru.  -> homeopathy-for-siblings-of-special-needs-children-in-bengaluru.html
