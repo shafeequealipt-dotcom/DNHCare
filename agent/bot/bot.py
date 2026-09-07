@@ -42,25 +42,51 @@ def _preview(post) -> str:
             f"<code>blog/{post.slug}.html</code>")
 
 
+MAX_TOPIC_ATTEMPTS = 3  # how many different auto-picked topics to try in one run
+                        # before giving up for the day on repeated duplicate slugs
+
+
 def _generate_blocking(topic: str | None, feedback: str = ""):
     """All the network/git/subprocess work — run off the event loop."""
     publisher.sync_main()
     auto_note = None
-    if topic is None:
-        topic = topics.next_topic()
+    user_supplied_topic = topic is not None
+    post = None
+    last_dup_msg = None
+
+    for attempt in range(MAX_TOPIC_ATTEMPTS):
         if topic is None:
-            topic = topics.autoselect_viral_topic()
-            topics.add_topic(topic)
-            auto_note = topic
-    post = content.generate_post(topic, feedback)
-    # Guard: never overwrite a live post. If this slug is already published, it's a
-    # duplicate — surface it instead of silently clobbering the existing article.
-    if publisher.slug_is_published(post.slug):
+            topic = topics.next_topic()
+            if topic is None:
+                topic = topics.autoselect_viral_topic()
+                topics.add_topic(topic)
+                auto_note = topic
+        post = content.generate_post(topic, feedback)
+        # Guard: never overwrite a live post. If this slug is already published,
+        # it's a duplicate.
+        if not publisher.slug_is_published(post.slug):
+            break
+        last_dup_msg = (f"duplicate: a post with slug '{post.slug}' is already "
+                        f"published (blog/{post.slug}.html). Topic was: {topic}.")
+        if user_supplied_topic:
+            # A topic the user explicitly gave (queue entry or /generate <topic>)
+            # collided — that's their call to fix, not ours to route around.
+            raise RuntimeError(
+                last_dup_msg + " Send /generate to try a fresh topic, or "
+                "/addtopic a new angle.")
+        # Auto-picked topic collided: permanently remove it (so it's never
+        # re-proposed) and try again with a genuinely different one, instead of
+        # losing the whole day's post to one bad topic pick.
+        topics.mark_done(topic, f"SKIPPED-DUPLICATE-{post.slug}")
+        log.warning("topic collided with an existing post, trying a different "
+                   "one (attempt %d/%d): %s", attempt + 1, MAX_TOPIC_ATTEMPTS, topic)
+        topic = None
+    else:
         raise RuntimeError(
-            f"duplicate: a post with slug '{post.slug}' is already published "
-            f"(blog/{post.slug}.html). Topic was: {topic}. Send /generate to try a "
-            f"fresh topic, or /addtopic a new angle."
-        )
+            f"Tried {MAX_TOPIC_ATTEMPTS} different auto-picked topics and every "
+            f"one collided with an already-published post. Last: {last_dup_msg} "
+            f"Consider /addtopic with a fresh, specific angle.")
+
     recent = publisher.recent_posts(2)
     html = content.render_html(post, recent)
     path = publisher.stage_draft(post.slug, html)
