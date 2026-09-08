@@ -13,6 +13,7 @@ Bengaluru). Keep each post original, locally useful, and tied to a service page.
 
 
 ## Done (most recent first)
+- 2026-09-08 [Children] Navigating Monsoon-Related Learning Disabilities: A Homeopathic Perspective on Supporting Kids with Dyslexia, Dysgraphia, and Dyscalculia in Bengaluru's Humid Climate.  -> homeopathy-for-learning-disabilities-in-bengaluru-children.html
 - 2026-09-08 [Allergies] Uncovering the Link Between Monsoon-Triggered Exposure to Indoor Volatile Organic Compounds (VOCs) and Exacerbated Allergic Reactions in Bengaluru: A Homeopathic Perspective on Air Purification and Relief Strategies.  -> monsoon-allergies-in-bengaluru-homeopathic-relief.html
 - 2026-09-06 [Skin] The Hidden Connection Between Monsoon-Induced Stress and Seborrheic Dermatitis: A Homeopathic Exploration of Mind-Skin Interactions and Natural Remedies for Scalp Health in Bengaluru.  -> seborrheic-dermatitis-homeopathy-bengaluru.html
 - 2026-09-01 [Migraine] Unraveling the Connection Between Monsoon-Induced Aromatic Compound Sensitivity and Migraine Episodes in Bengaluru: A Homeopathic Exploration of Fragrance Triggers and Relief Strategies  -> migraine-homeopathy-bengaluru-monsoon-sensitivity.html
