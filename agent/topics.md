@@ -13,6 +13,7 @@ Bengaluru). Keep each post original, locally useful, and tied to a service page.
 
 
 ## Done (most recent first)
+- 2026-09-09 [Skin] Monsoon-Induced Chlorine Sensitivity from Water Purification Systems: A Homeopathic Perspective on Mitigating Skin Irritation and Allergic Reactions in Bengaluru's Residents.  -> chlorine-sensitivity-homeopathy-bengaluru.html
 - 2026-09-09 [Migraine] Unraveling the Connection Between Monsoon-Induced Changes in Bengaluru's Light Spectrum and Migraine Episodes: A Homeopathic Exploration of Photobiomodulation and Relief Strategies  -> migraine-homeopathy-bengaluru-monsoon-light-spectrum.html
 - 2026-09-08 [Children] Navigating Monsoon-Related Learning Disabilities: A Homeopathic Perspective on Supporting Kids with Dyslexia, Dysgraphia, and Dyscalculia in Bengaluru's Humid Climate.  -> homeopathy-for-learning-disabilities-in-bengaluru-children.html
 - 2026-09-08 [Allergies] Uncovering the Link Between Monsoon-Triggered Exposure to Indoor Volatile Organic Compounds (VOCs) and Exacerbated Allergic Reactions in Bengaluru: A Homeopathic Perspective on Air Purification and Relief Strategies.  -> monsoon-allergies-in-bengaluru-homeopathic-relief.html
