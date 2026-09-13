@@ -13,6 +13,7 @@ Bengaluru). Keep each post original, locally useful, and tied to a service page.
 
 
 ## Done (most recent first)
+- 2026-09-13 [Women] Navigating Monsoon-Related Changes in Breast Milk Composition and Supply: A Homeopathic Perspective on Supporting Lactating Mothers in Bengaluru's Humid Climate  -> homeopathy-for-breast-milk-supply-in-bengaluru.html
 - 2026-09-13 [Skin] Monsoon-Induced Impacts on Tattoo Aftercare and Healing: A Homeopathic Perspective on Preventing Infections and Promoting Healthy Skin in Bengaluru's Humid Climate  -> tattoo-aftercare-homeopathy-bengaluru.html
 - 2026-09-12 [Allergies] Uncovering the Impact of Monsoon-Triggered Plant Allergens from Bengaluru's Urban Green Spaces on Respiratory Health: A Homeopathic Perspective on Prevention and Relief Strategies.  -> bengaluru-monsoon-allergies-homeopathy.html
 - 2026-09-11 [Migraine] Exploring the Impact of Monsoon-Induced Disruptions to Morning Routine on Circadian Rhythms and Migraine Patterns in Bengaluru: A Homeopathic Perspective on Synchronization and Relief Strategies.  -> migraine-homeopathy-bengaluru-monsoon-routine-disruptions.html
