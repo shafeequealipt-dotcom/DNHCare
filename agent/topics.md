@@ -13,6 +13,7 @@ Bengaluru). Keep each post original, locally useful, and tied to a service page.
 
 
 ## Done (most recent first)
+- 2026-09-17 [Skin] Monsoon-Induced Impacts on Skin Microbiome: A Homeopathic Perspective on Restoring Balance and Promoting Healthy Skin in Bengaluru's Humid Climate  -> monsoon-skin-homeopathy-bengaluru.html
 - 2026-09-16 [Children] Navigating Monsoon-Related Delays in Speech Development: A Homeopathic Perspective on Supporting Language Skills and Communication in Preschoolers in Bengaluru.  -> homeopathy-for-speech-delay-in-children-bengaluru.html
 - 2026-09-15 [Skin] Monsoon-Induced Impacts on Wound Healing: A Homeopathic Perspective on Promoting Healthy Skin Regeneration and Scar Prevention in Bengaluru's Humid Climate  -> monsoon-wound-healing-homeopathy-bengaluru.html
 - 2026-09-15 [Migraine] Exploring the Relationship Between Monsoon-Induced Changes in Bengaluru's Noise Pollution and Migraine Episodes: A Homeopathic Perspective on Sound Sensitivity and Relief Strategies.  -> migraine-relief-bengaluru-homeopathy-monsoon-noise-pollution.html
