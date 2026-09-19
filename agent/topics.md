@@ -13,6 +13,7 @@ Bengaluru). Keep each post original, locally useful, and tied to a service page.
 
 
 ## Done (most recent first)
+- 2026-09-19 [Children] Navigating Monsoon-Related Changes in Kids' Dreams and Nightmares: A Homeopathic Perspective on Sleep Patterns and Emotional Wellbeing in Bengaluru's Rainy Season  -> homeopathy-for-kids-nightmares-in-bengaluru-monsoon.html
 - 2026-09-19 [Skin] Monsoon-Induced Impacts on Skin Elasticity: A Homeopathic Perspective on Maintaining Firmness and Hydration in Bengaluru's Humid Climate  -> homeopathy-for-skin-elasticity-in-bengaluru.html
 - 2026-09-18 [Children] Navigating Monsoon-Related Delays in Potty Training: A Homeopathic Perspective on Supporting Toilet Learning and Overcoming Setbacks in Preschoolers in Bengaluru.  -> homeopathy-for-potty-training-delays-in-bengaluru.html
 - 2026-09-17 [Women] Navigating Monsoon-Related Changes in Menopause Timing and Symptoms: A Homeopathic Perspective on Hormonal Balance and Transition Support in Bengaluru's Humid Climate  -> menopause-homeopathy-bengaluru.html
