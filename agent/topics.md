@@ -13,6 +13,7 @@ Bengaluru). Keep each post original, locally useful, and tied to a service page.
 
 
 ## Done (most recent first)
+- 2026-09-21 [Children] Navigating the Impact of Monsoon-Related Screen Time on Kids' Creative Development: Homeopathic Strategies for Fostering Imagination and Artistic Expression in Bengaluru's Indoor Season.  -> monsoon-screen-time-homeopathy-for-kids-in-bengaluru.html
 - 2026-09-21 [Skin] The Impact of Monsoon-Induced Moisture on Bengaluru's Residents with Eczema: A Homeopathic Perspective on Preventing Flare-Ups and Promoting Skin Resilience.  -> eczema-in-bengaluru-homeopathy-for-monsoon-relief.html
 - 2026-09-20 [Migraine] Uncovering the Connection Between Monsoon-Induced Changes in Bengaluru's Food Scene and Migraine Episodes: A Homeopathic Exploration of Food Triggers and Relief Strategies in the Context of Seasonal Fruits and Vegetables.  -> migraine-homeopathy-bengaluru-monsoon-food-triggers.html
 - 2026-09-19 [Children] Navigating Monsoon-Related Changes in Kids' Dreams and Nightmares: A Homeopathic Perspective on Sleep Patterns and Emotional Wellbeing in Bengaluru's Rainy Season  -> homeopathy-for-kids-nightmares-in-bengaluru-monsoon.html
