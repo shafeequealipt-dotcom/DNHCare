@@ -13,6 +13,7 @@ Bengaluru). Keep each post original, locally useful, and tied to a service page.
 
 
 ## Done (most recent first)
+- 2026-09-21 [Skin] The Impact of Monsoon-Induced Moisture on Bengaluru's Residents with Eczema: A Homeopathic Perspective on Preventing Flare-Ups and Promoting Skin Resilience.  -> eczema-in-bengaluru-homeopathy-for-monsoon-relief.html
 - 2026-09-20 [Migraine] Uncovering the Connection Between Monsoon-Induced Changes in Bengaluru's Food Scene and Migraine Episodes: A Homeopathic Exploration of Food Triggers and Relief Strategies in the Context of Seasonal Fruits and Vegetables.  -> migraine-homeopathy-bengaluru-monsoon-food-triggers.html
 - 2026-09-19 [Children] Navigating Monsoon-Related Changes in Kids' Dreams and Nightmares: A Homeopathic Perspective on Sleep Patterns and Emotional Wellbeing in Bengaluru's Rainy Season  -> homeopathy-for-kids-nightmares-in-bengaluru-monsoon.html
 - 2026-09-19 [Skin] Monsoon-Induced Impacts on Skin Elasticity: A Homeopathic Perspective on Maintaining Firmness and Hydration in Bengaluru's Humid Climate  -> homeopathy-for-skin-elasticity-in-bengaluru.html
