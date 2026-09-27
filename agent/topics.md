@@ -13,6 +13,7 @@ Bengaluru). Keep each post original, locally useful, and tied to a service page.
 
 
 ## Done (most recent first)
+- 2026-09-27 [Skin] Monsoon-Induced Impacts on Bengaluru's Residents with Vitiligo: A Homeopathic Perspective on Managing Skin Depigmentation and Promoting Repigmentation in the City's Humid Climate  -> homeopathy-for-vitiligo-in-bengaluru.html
 - 2026-09-27 [Children] Navigating Monsoon-Related Changes in Kids' Gut-Associated Lymphoid Tissue (GALT) and Microbiome through Homeopathic Principles and Probiotic-Rich Foods in Bengaluru's Humid Climate  -> homeopathy-for-kids-gut-health-in-bengaluru-monsoon.html
 - 2026-09-26 [Migraine] Uncovering the Relationship Between Monsoon-Induced Changes in Bengaluru's Urban Tree Pollen and Migraine Episodes: A Homeopathic Exploration of Pollen Triggers and Relief Strategies.  -> migraine-homeopathy-bengaluru-pollen-triggers.html
 - 2026-09-25 [Allergies] Navigating the Hidden Dangers of Monsoon-Induced Indoor Pesticide Accumulation in Bengaluru Homes: A Homeopathic Perspective on Safe Pest Control and Allergy Prevention.  -> monsoon-allergies-in-bengaluru-homeopathic-solutions.html
