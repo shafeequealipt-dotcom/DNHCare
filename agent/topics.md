@@ -13,6 +13,7 @@ Bengaluru). Keep each post original, locally useful, and tied to a service page.
 
 
 ## Done (most recent first)
+- 2026-09-28 [Children] Navigating Monsoon-Related Changes in Kids' Attachment Styles: A Homeopathic Perspective on Emotional Regulation and Parent-Child Bonding in Bengaluru's Rainy Season  -> monsoon-emotional-changes-in-kids-bengaluru.html
 - 2026-09-27 [Women] Navigating Monsoon-Related Changes in Thyroid-Stimulating Hormone (TSH) Levels: A Homeopathic Perspective on Thyroid Balance and Immune System Support in Bengaluru's Humid Climate  -> thyroid-balance-homeopathy-bengaluru-women.html
 - 2026-09-27 [Skin] Monsoon-Induced Impacts on Bengaluru's Residents with Vitiligo: A Homeopathic Perspective on Managing Skin Depigmentation and Promoting Repigmentation in the City's Humid Climate  -> homeopathy-for-vitiligo-in-bengaluru.html
 - 2026-09-27 [Children] Navigating Monsoon-Related Changes in Kids' Gut-Associated Lymphoid Tissue (GALT) and Microbiome through Homeopathic Principles and Probiotic-Rich Foods in Bengaluru's Humid Climate  -> homeopathy-for-kids-gut-health-in-bengaluru-monsoon.html
