@@ -13,6 +13,7 @@ Bengaluru). Keep each post original, locally useful, and tied to a service page.
 
 
 ## Done (most recent first)
+- 2026-09-30 [Skin] Monsoon-Induced Impacts on Bengaluru's Residents with Solar Keratosis: A Homeopathic Perspective on Preventing and Managing Premature Aging and Skin Lesions in the City's Humid Climate  -> homeopathy-for-solar-keratosis-in-bengaluru.html
 - 2026-09-30 [Women] Navigating Monsoon-Related Changes in Adrenal Function and Menstrual Cycles: A Homeopathic Perspective on Cortisol Balance and Hormonal Resilience in Bengaluru's Humid Climate  -> homeopathy-for-women-in-bengaluru-monsoon-hormone-balance.html
 - 2026-09-30 [Children] Navigating Monsoon-Related Changes in Kids' Social Skills: A Homeopathic Perspective on Fostering Friendship and Cooperation in Bengaluru's Indoor Playgroups.  -> monsoon-kids-social-skills-homeopathy-bengaluru.html
 - 2026-09-29 [Allergies] Monsoon-Induced Cross-Contamination of Food and Personal Care Products: A Homeopathic Perspective on Safe Storage and Handling Practices in Bengaluru Homes.  -> monsoon-allergies-bengaluru-homeopathic-tips.html
