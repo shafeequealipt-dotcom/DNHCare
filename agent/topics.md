@@ -13,6 +13,7 @@ Bengaluru). Keep each post original, locally useful, and tied to a service page.
 
 
 ## Done (most recent first)
+- 2026-10-07 [Skin] Monsoon-Induced Impacts on Bengaluru's Residents with Dermatographic Urticaria: A Homeopathic Perspective on Managing Skin Writing and Hives in Humid Climates.  -> dermatographic-urticaria-homeopathy-bengaluru.html
 - 2026-10-06 [Children] Homeopathic Approaches to Mitigating the Impact of Monsoon-Related Power Outages on Children's Educational Progress and Productivity in Bengaluru.  -> monsoon-homeopathy-for-children-in-bengaluru.html
 - 2026-10-06 [Children] Navigating Monsoon-Related Changes in Kids' Playful Learning through Music Therapy: A Homeopathic Perspective on Fostering Creativity and Cognitive Development in Bengaluru's Indoor Environments.  -> monsoon-homeopathy-for-children-bengaluru.html
 - 2026-10-05 [Skin] Exploring the Impact of Monsoon-Induced Changes in Bengaluru's Tap Water Temperature on Skin Health: A Homeopathic Perspective on Thermal Water Therapy and Skin Resilience.  -> monsoon-water-changes-bengaluru-skin-health.html
