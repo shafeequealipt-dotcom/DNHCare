@@ -13,6 +13,7 @@ Bengaluru). Keep each post original, locally useful, and tied to a service page.
 
 
 ## Done (most recent first)
+- 2026-10-11 [Children] Navigating Monsoon-Related Changes in Kids' Attachment to Pets: A Homeopathic Perspective on Emotional Support and Allergy Prevention in Bengaluru's Pet-Owning Families  -> monsoon-pet-allergies-in-kids-bengaluru-homeopathy.html
 - 2026-10-11 [Women] Navigating Monsoon-Related Changes in Perineal Health: A Homeopathic Perspective on Preventing and Managing Perineal Tears, Infections, and Discomfort in Bengaluru's Humid Climate  -> homeopathy-for-perineal-health-in-bengaluru.html
 - 2026-10-10 [Children] Navigating Monsoon-Related Changes in Kids' Circadian Rhythms: A Homeopathic Perspective on Establishing Consistent Sleep Schedules and Morning Routines in Bengaluru's Variable Daylight Hours.  -> monsoon-sleep-tips-for-kids-in-bengaluru.html
 - 2026-10-09 [Skin] The Impact of Monsoon-Induced Changes in Bengaluru's Urban Soil Quality on Skin Health: A Homeopathic Perspective on Mitigating Effects of Heavy Metals and Promoting Skin Resilience.  -> bengaluru-monsoon-skin-health-homeopathy.html
