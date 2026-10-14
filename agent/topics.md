@@ -13,6 +13,7 @@ Bengaluru). Keep each post original, locally useful, and tied to a service page.
 
 
 ## Done (most recent first)
+- 2026-10-14 [Migraine] Monsoon-Triggered Vestibular Migraines: A Homeopathic Exploration of Balance-Related Triggers and Relief Strategies for Bengaluru Residents.  -> migraine-relief-bengaluru-monsoon-triggers.html
 - 2026-10-13 [Children] Navigating Monsoon-Related Changes in Kids' Friendship Dynamics: A Homeopathic Perspective on Fostering Empathy and Cooperation Through Indoor Playdates in Bengaluru.  -> monsoon-friendships-kids-homeopathy-bengaluru.html
 - 2026-10-12 [Women] Navigating Monsoon-Related Changes in Breastfeeding and Lactation Patterns: A Homeopathic Perspective on Supporting New Mothers in Bengaluru's Humid Climate  -> homeopathy-for-breastfeeding-in-bengaluru-monsoon.html
 - 2026-10-12 [Allergies] Uncovering the Impact of Monsoon-Induced Changes in Bengaluru's Urban Fungal Growth on Respiratory Health: A Homeopathic Perspective on Prevention and Relief Strategies for Fungal-Related Allergies.  -> homeopathy-for-fungal-allergies-in-bengaluru.html
