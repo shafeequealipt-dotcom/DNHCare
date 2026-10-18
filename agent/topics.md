@@ -13,6 +13,7 @@ Bengaluru). Keep each post original, locally useful, and tied to a service page.
 
 
 ## Done (most recent first)
+- 2026-10-18 [Children] Homeopathic Approaches to Supporting Kids' Executive Function Skills During Bengaluru's Monsoon Season: Strategies for Improving Organization, Time Management, and Self-Regulation in a Humid Climate.  -> children-executive-function-homeopathy-bengaluru.html
 - 2026-10-17 [Skin] The Impact of Monsoon-Induced Silica Deficiency on Skin Health in Bengaluru: A Homeopathic Perspective on Dietary Sources and Remedies for Stronger Skin.  -> monsoon-skin-health-bengaluru-homeopathy-silica-deficiency.html
 - 2026-10-16 [Allergies] Exploring the Impact of Monsoon-Induced Changes in Bengaluru's Urban Biodiversity on Local Allergy Patterns: A Homeopathic Perspective on Ecosystem Balance and Respiratory Health.  -> bengaluru-allergies-monsoon-homeopathy-relief.html
 - 2026-10-16 [Children] Navigating Monsoon-Related Changes in Kids' Phonological Awareness: A Homeopathic Perspective on Supporting Early Literacy Skills and Language Development in Bengaluru's Indoor Learning Environments.  -> homeopathy-for-childrens-language-development-in-bengaluru.html
