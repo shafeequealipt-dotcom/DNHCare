@@ -13,6 +13,7 @@ Bengaluru). Keep each post original, locally useful, and tied to a service page.
 
 
 ## Done (most recent first)
+- 2026-10-20 [Skin] The Impact of Monsoon-Induced Waterborne Pathogens on Atopic Dermatitis in Bengaluru: A Homeopathic Perspective on Prevention and Management.  -> atopic-dermatitis-homeopathy-bengaluru.html
 - 2026-10-19 [Children] Navigating Monsoon-Related Changes in Kids' Mirror Neuron System: A Homeopathic Perspective on Empathy Development and Social Learning in Bengaluru's Indoor Play Environments.  -> monsoon-social-learning-homeopathy-children-bengaluru.html
 - 2026-10-19 [Women] Navigating Monsoon-Related Changes in Ovarian Cysts: A Homeopathic Perspective on Hormonal Balance, Follicular Health, and Fertility in Bengaluru's Humid Climate  -> homeopathy-for-ovarian-cysts-in-bengaluru.html
 - 2026-10-18 [Migraine] Uncovering the Relationship Between Monsoon-Induced Changes in Bengaluru's Urban Traffic Patterns and Migraine Episodes: A Homeopathic Exploration of Commute-Related Stress Triggers and Relief Strategies  -> migraine-homeopathy-bengaluru-monsoon-traffic-relief.html
