@@ -13,6 +13,7 @@ Bengaluru). Keep each post original, locally useful, and tied to a service page.
 
 
 ## Done (most recent first)
+- 2026-10-21 [Children] Homeopathic Approaches to Supporting Siblings of Children with Monsoon-Exacerbated Neurodevelopmental Disorders: Strategies for Emotional Resilience and Inclusive Family Dynamics in Bengaluru.  -> homeopathy-for-siblings-of-children-with-neurodevelopmental-disorders-.html
 - 2026-10-20 [Skin] The Impact of Monsoon-Induced Waterborne Pathogens on Atopic Dermatitis in Bengaluru: A Homeopathic Perspective on Prevention and Management.  -> atopic-dermatitis-homeopathy-bengaluru.html
 - 2026-10-19 [Children] Navigating Monsoon-Related Changes in Kids' Mirror Neuron System: A Homeopathic Perspective on Empathy Development and Social Learning in Bengaluru's Indoor Play Environments.  -> monsoon-social-learning-homeopathy-children-bengaluru.html
 - 2026-10-19 [Women] Navigating Monsoon-Related Changes in Ovarian Cysts: A Homeopathic Perspective on Hormonal Balance, Follicular Health, and Fertility in Bengaluru's Humid Climate  -> homeopathy-for-ovarian-cysts-in-bengaluru.html
