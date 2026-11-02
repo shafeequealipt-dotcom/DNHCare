@@ -13,6 +13,7 @@ Bengaluru). Keep each post original, locally useful, and tied to a service page.
 
 
 ## Done (most recent first)
+- 2026-11-02 [Children] Navigating the Impact of Monsoon-Related Power Outages on Children's Learning Styles and Adaptability in Bengaluru: A Homeopathic Perspective on Fostering Resilience and Academic Readiness.  -> monsoon-power-outages-homeopathy-for-kids-in-bengaluru.html
 - 2026-11-01 [Children] Navigating Monsoon-Related Changes in Kids' Emotional Expression Through Creative Writing: A Homeopathic Perspective on Fostering Self-Awareness and Resilience in Bengaluru's Indoor Season.  -> monsoon-emotions-in-kids-homeopathy-bengaluru.html
 - 2026-11-01 [Skin] Monsoon-Induced Impacts on Skin's Natural Moisturizing Factor: A Homeopathic Exploration of Humidity's Effects on Bengaluru Residents' Skin Hydration and Barrier Function.  -> monsoon-skin-care-bengaluru-homeopathy.html
 - 2026-10-31 [Children] Homeopathic Approaches to Fostering Resilience in Children of Bengaluru's Low-Income Families: Mitigating the Impact of Monsoon-Induced Food Insecurity on Young Minds.  -> homeopathy-for-children-in-bengaluru.html
