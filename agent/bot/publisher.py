@@ -5,7 +5,7 @@ import re
 import sys
 import subprocess
 import datetime
-from . import config, topics
+from . import config, journal_template, topics
 
 
 def _git(*args, check=True):
@@ -23,18 +23,9 @@ def sync_main():
 
 
 def recent_posts(n=2):
-    """Parse existing post cards from blog/index.html for the 'Keep reading' block."""
+    """Newest Journal cards from blog/index.html for the 'Keep reading' block."""
     idx = os.path.join(config.BLOG_DIR, "index.html")
-    html = open(idx, encoding="utf-8").read()
-    out = []
-    for m in re.finditer(
-        r'<a class="post-card" href="([^"]+)\.html">\s*'
-        r'<span class="post-cat">([^<]+)</span>\s*<h2>([^<]+)</h2>', html):
-        out.append({"slug": m.group(1), "category": m.group(2).strip(),
-                    "title": m.group(3).strip()})
-        if len(out) >= n:
-            break
-    return out
+    return journal_template.parse_cards(open(idx, encoding="utf-8").read())[:n]
 
 
 def stage_draft(slug, html_str):
@@ -110,19 +101,20 @@ def _insert_schema_entry(post):
 
 
 def _insert_index_card(post):
-    idx = os.path.join(config.BLOG_DIR, "index.html")
-    html = open(idx, encoding="utf-8").read()
+    """New card first on the Journal page and in the home page's latest row. Raises
+    if either page is not in the new template, before anything is committed."""
     nice_date = datetime.date.today().strftime("%d %b %Y")
-    card = (f'    <a class="post-card" href="{post.slug}">\n'
-            f'      <span class="post-cat">{post.category}</span>\n'
-            f'      <h2>{post.title}</h2>\n'
-            f'      <p>{post.meta_description}</p>\n'
-            f'      <span class="post-foot">{nice_date} &middot; {post.read_minutes} min read</span>\n'
-            f'    </a>\n')
-    marker = '<main class="post-grid" id="posts">\n'
-    html = html.replace(marker, marker + card, 1)
-    with open(idx, "w", encoding="utf-8") as f:
-        f.write(html)
+    foot = f"{nice_date} · {post.read_minutes} min read"
+    pages = [(os.path.join(config.BLOG_DIR, "index.html"), journal_template.add_to_journal, ""),
+             (os.path.join(config.REPO_DIR, "index.html"), journal_template.add_to_home, "blog/")]
+    updated = []
+    for path, add, prefix in pages:
+        card = journal_template.card(post.slug, post.category, post.title,
+                                     post.meta_description, foot, prefix)
+        updated.append((path, add(open(path, encoding="utf-8").read(), card)))
+    for path, text in updated:
+        with open(path, "w", encoding="utf-8") as f:
+            f.write(text)
 
 
 def _insert_sitemap(slug):
