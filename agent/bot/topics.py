@@ -1,8 +1,9 @@
 """Topic queue management — read/add/consume topics in agent/topics.md,
 and auto-pick a viral, current, healthcare topic via Claude when the queue is low."""
 import re
+import random
 import datetime
-from . import config, llm
+from . import config, llm, seasons
 
 _QUEUE_HDR = "## Queue (oldest first = next up)"
 _DONE_HDR = "## Done (most recent first)"
@@ -90,12 +91,61 @@ def mark_done(topic: str, slug: str):
     _write(new)
 
 
+def _words(text: str) -> set:
+    """Lower-case content words, crudely singularised, for overlap scoring."""
+    return {w.rstrip("s") for w in re.findall(r"[a-z]{3,}", text.lower())} - _STOP
+
+
+_STOP = {"and", "the", "for", "with", "from", "near", "best", "top"}
+
+
+def _search_keywords() -> list:
+    """Top GBP search phrases, or [] when GBP is off or the call fails. Imported
+    lazily: insights imports this module."""
+    try:
+        from . import gbp, insights
+        return insights.top_search_keywords(15) if gbp.is_configured() else []
+    except Exception:  # noqa
+        return []
+
+
+def pick_focus_service(keywords: list, day: datetime.date | None = None) -> str:
+    """Choose the GBP service the next post is about: one not covered in the last
+    SERVICE_ROTATION_DAYS, preferring services that match this month's season or
+    what people searched. Falls back to the least recently covered service."""
+    day = day or datetime.date.today()
+    names = list(config.SERVICE_CATEGORY)
+    try:
+        from . import gbp
+        if gbp.is_configured():
+            live = set(gbp.service_names())
+            names = [n for n in names if n in live] or names
+    except Exception:  # noqa
+        pass
+    last = config.get_service_posts()
+    cutoff = (day - datetime.timedelta(days=config.SERVICE_ROTATION_DAYS)).isoformat()
+    due = [n for n in names if last.get(n, "") < cutoff] or names
+    phase, complaints = seasons.for_month(day.month)
+    demand = _words(" ".join(complaints) + " " + " ".join(k for k, _ in keywords))
+    ranked = sorted(due, key=lambda n: (-len(_words(n) & demand), last.get(n, "")))
+    top = [n for n in ranked if _words(n) & demand][:3] or ranked[:3]
+    return random.choice(top)
+
+
 def autoselect_viral_topic() -> str:
-    """Ask the current Cloudflare Workers AI model for ONE timely, shareable, healthcare-relevant
-    blog topic suited to the clinic. Returns a '[Category] Title' line."""
-    cats = " / ".join(config.CATEGORIES)
+    """Ask the current Cloudflare Workers AI model for ONE timely, useful blog topic,
+    grounded in the real Bengaluru season (seasons.py), the clinic's actual GBP
+    search phrases, and a focus service from the rotation. Returns a
+    '[Category] Title' line whose category matches the focus service."""
     today = datetime.date.today()
-    month = today.strftime("%B")
+    keywords = _search_keywords()
+    focus = pick_focus_service(keywords, today)
+    category = config.SERVICE_CATEGORY[focus]
+    kw_block = ""
+    if keywords:
+        kw_block = ("\nPhrases people actually typed on Google to find the clinic "
+                    "(use one naturally in the title if it fits): "
+                    + ", ".join(k for k, _ in keywords[:10]) + ".")
     # Give the model the full list of already-published topics so it never repeats one.
     already = list_done_titles()
     avoid_block = ""
@@ -113,15 +163,19 @@ def autoselect_viral_topic() -> str:
             "role": "user",
             "content": (
                 "You plan content for a homeopathy clinic in Varthur, Bengaluru "
-                f"(Dr. Nafia's Homoeopathic Medical Centre). Categories: {cats}.\n"
-                f"It is {month} {today.year} in Bengaluru, India. Considering the "
-                "current season, typical weather, and health concerns common at this "
-                "time of year, propose ONE blog topic that is timely, highly "
-                "shareable, and genuinely useful. It MUST map to one of the categories "
-                "and stay within safe, non-overclaiming homeopathy content."
+                "(Dr. Nafia's Homoeopathic Medical Centre).\n"
+                + seasons.brief(today) + kw_block + "\n\n"
+                f"Write about this service the clinic offers: {focus}. Propose ONE "
+                "blog topic a local patient would actually search for — a symptom, "
+                "question or seasonal problem they have right now — tied to that "
+                "service and, where it honestly fits, to the season above. Never "
+                "describe a season other than the one above. Keep the title under "
+                "12 words and plain-spoken. Stay on the patient's health: no "
+                "socio-economic, infrastructure, technology or lifestyle-trend "
+                "angles, and safe, non-overclaiming homeopathy content only."
                 + avoid_block
                 + "\n\nReply with EXACTLY one line and nothing else, in this format:\n"
-                "[Category] Title of the post"
+                f"[{category}] Title of the post"
             ),
         }],
     )
@@ -129,5 +183,8 @@ def autoselect_viral_topic() -> str:
     line = next((l.strip() for l in reversed(text.splitlines())
                  if re.match(r"^\[[A-Za-z]+\]\s+.+", l.strip())), None)
     if not line:
-        line = "[Skin] Seasonal skin care: a gentle homeopathic perspective"
+        line = f"[{category}] {focus}: what helps in {today.strftime('%B')}"
+    # The category must match the focus service, whatever the model wrote.
+    line = re.sub(r"^\[[A-Za-z]+\]", f"[{category}]", line)
+    config.record_service_post(focus)
     return line
