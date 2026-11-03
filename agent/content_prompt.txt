@@ -8,9 +8,10 @@ SEO REQUIREMENTS (apply to every post):
   e.g. "homeopathy for eczema in Bengaluru", "child recurring cold treatment Varthur",
   "migraine homeopathy Whitefield". Put the focus keyword in: the title, the H1 (= title),
   the meta description, the first 1-2 sentences, the URL slug, and at least one H2 heading.
-- Choose 4-6 related / long-tail / secondary keywords AND weave them in naturally —
-  include local terms where they fit: Varthur, Gunjur, Whitefield, Sarjapur Road, Balagere,
-  Bengaluru. NEVER keyword-stuff; readability and natural phrasing come first.
+- Choose 4-6 related / long-tail / secondary keywords AND weave them in naturally.
+  Location keywords are MANDATORY on every post: Varthur plus the nearby areas within
+  ~10 km — the exact rules and area list are appended automatically below under
+  "LOCAL SEO". NEVER keyword-stuff; readability and natural phrasing come first.
 - Write descriptive, keyword-aware H2 headings (not vague one-word labels).
 - meta_description: 140-158 chars, compelling, contains the focus keyword.
 - Include 2-3 FAQs (these win featured snippets) with safe, useful answers.

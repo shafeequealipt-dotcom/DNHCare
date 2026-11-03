@@ -153,7 +153,28 @@ trick = canvas image-sequence scrub.
     REMEDY NAME (Belladonna, Hepar sulph, Pulsatilla + 30 more — never name remedies in prose);
     missing required element (med-disclaimer, author-box, BlogPosting/BreadcrumbList schema,
     canonical, scroll-progress, footer NAP, WhatsApp CTA); no internal service-page link
-    (clean URL, no .html); body < 380 words; missing/too-short title or meta description.
+    (clean URL, no .html); body < 380 words; missing/too-short title or meta description;
+    fewer than 5 of the nearby-area names in the ARTICLE BODY (see LOCAL SEO below).
+- LOCAL SEO / SERVICE AREA (added 2026-11-04): every post names Varthur + the areas within
+    ~10 km. ONE source of truth = agent/locations.py (PRIMARY, RADIUS_KM, CENTER lat/lng,
+    NEARBY_AREAS closest-first, MIN_AREAS_IN_POST) — EDIT THE AREA LIST THERE ONLY.
+    Three layers, so it holds even if the model ignores it:
+      1. PROMPT: content._location_prompt_block() is appended IN CODE (not in
+         content_prompt.txt), so /setprompt or a GitHub prompt edit can't drop it. Asks for
+         Varthur in title/meta + lede + an H2, 3-5 areas woven naturally, geo keywords.
+      2. TEMPLATE (the hard guarantee): content.render_html() ALWAYS adds a
+         <div class="areas-served"> H2 section listing every area, a schema.org GeoCircle
+         (10 km, contentLocation) in the BlogPosting JSON-LD, and geo keywords.
+      3. GATE: check_post.py needs >=5 areas in <main> (NOT whole page — the shared
+         nav/footer already say Varthur + 4 areas, which made a whole-page check useless).
+         The areas-served block is excluded from the 380-word thin-content count.
+    GBP posts: content._with_service_area() appends "Serving Varthur and nearby areas within
+    about 10 km, including ..." unless the model already localised the blurb.
+    NOT retro-fitted: posts published before this date and the shared site footer
+    ("Areas served" = 5 areas, journal_template.py) are unchanged.
+    Area list is APPROXIMATE neighbourhoods within ~10 km (not a measured survey).
+    SEO CAVEAT: Google treats long lists of place names as keyword stuffing; 15 areas in one
+    clearly-labelled section is normal for a local clinic — don't grow the list much further.
 - GOOGLE BUSINESS PROFILE AUTO-POST (LIVE since 2026-07-07; all 5 env vars set on Oracle):
     on every auto-publish, after the blog publishes, bot ALSO creates a GBP local post.
     GBP failure never blocks the blog.

@@ -8,6 +8,11 @@ Usage:  python agent/check_post.py blog/<new-post>.html
 """
 import sys, re, os
 
+try:                      # imported as agent.check_post (by the bot)
+    from . import locations
+except ImportError:       # run as a script: python agent/check_post.py <file>
+    import locations
+
 # Medical-overclaim words banned on a YMYL health site (case-insensitive, word-ish match).
 BANNED = [
     "cure", "cures", "cured", "guaranteed", "guarantee",
@@ -63,13 +68,33 @@ def main(path):
         if needle not in html:
             fails.append(f"missing required element: {label} ({needle})")
 
+    # local SEO: every post must name Varthur and enough of the ~10 km service area
+    # (agent/locations.py) IN THE ARTICLE ITSELF. Checked against the <main> body only —
+    # the shared nav/footer already says "Varthur" and lists 4 areas on every page, which
+    # would make this check meaningless. The template always renders all areas, so a
+    # healthy post passes trivially; this catches a template regression or hand edit.
+    _main = re.search(r'<main class="article">([\s\S]*?)</main>', html)
+    article_text = visible_text(_main.group(1)) if _main else text
+    if not re.search(r"\b" + re.escape(locations.PRIMARY.lower()) + r"\b", article_text):
+        fails.append(f"local SEO: '{locations.PRIMARY}' is not mentioned in the article body")
+    found = [a for a in locations.NEARBY_AREAS
+             if re.search(r"\b" + re.escape(a.lower()) + r"\b", article_text)]
+    if len(found) < locations.MIN_AREAS_IN_POST:
+        fails.append(f"local SEO: only {len(found)} nearby area(s) mentioned "
+                     f"(need >= {locations.MIN_AREAS_IN_POST} of the ~{locations.RADIUS_KM} km "
+                     f"service area: {', '.join(locations.NEARBY_AREAS)})")
+
     # must link to at least one service page (internal linking)
     if not re.search(r'\.\./(skin-treatment|allergy-treatment|pediatric-care|migraine-treatment|womens-health)(\.html)?', html):
         fails.append("no internal link to a service page")
 
     # word count of the article body (sanity: real content, not thin)
     body = re.search(r'<main class="article">([\s\S]*?)</main>', html)
-    words = len(visible_text(body.group(1)).split()) if body else 0
+    # the auto-added areas-served block is boilerplate, not content — don't let it
+    # help a thin article clear the floor
+    body_html = re.sub(r'<div class="areas-served">[\s\S]*?</div>', " ",
+                       body.group(1), flags=re.I) if body else ""
+    words = len(visible_text(body_html).split()) if body else 0
     # hard floor blocks spam-thin content; PLAYBOOK target is 600-900 words.
     if words < 380:
         fails.append(f"article too thin: {words} words (need >= 380; aim 600-900)")

@@ -9,6 +9,7 @@ from typing import List
 import openai
 from pydantic import BaseModel, Field, ValidationError
 from . import config, journal_template, llm
+from .. import locations   # agent/ is a namespace package (no __init__.py needed)
 
 
 class Section(BaseModel):
@@ -39,13 +40,13 @@ class Post(BaseModel):
 
 
 _SCHEMA = """{
-  "title": "string, <=60 chars, includes the focus keyword + a local cue (Varthur/Bengaluru)",
+  "title": "string, <=60 chars, includes the focus keyword + 'Varthur' (or Bengaluru if Varthur cannot fit)",
   "slug": "short-lowercase-hyphenated-no-extension, contains the focus keyword",
   "meta_description": "140-158 chars, compelling, contains the focus keyword",
   "category": "one of: Skin | Allergies | Children | Migraine | Women",
   "read_minutes": 4,
   "focus_keyword": "the ONE primary search phrase this post targets",
-  "keywords": ["4-6 related / long-tail / local secondary keywords"],
+  "keywords": ["4-6 related / long-tail secondary keywords, 2-3 of them geo-modified with Varthur or a nearby area, e.g. 'homeopathy doctor near Whitefield'"],
   "lede": "opening paragraph; use the focus keyword within the first sentence or two",
   "sections": [{"heading": "descriptive keyword-aware H2", "paragraphs": ["..."], "bullets": ["...optional..."]}],
   "faqs": [{"question": "string", "answer": "string"}],
@@ -63,6 +64,7 @@ SEO: pick ONE focus keyword (a real local search phrase) and place it in the tit
 meta description, first sentences, slug and at least one H2. Add 4-6 related/long-tail
 keywords woven in naturally (local terms: Varthur, Gunjur, Whitefield, Sarjapur Road,
 Balagere, Bengaluru). No keyword-stuffing. Descriptive keyword-aware H2s. Include 2-3 FAQs.
+(The LOCAL SEO block appended below is mandatory and overrides anything looser here.)
 
 STYLE: professional, warm, simple and logical; short paragraphs; 600-900 words; 3-4 sections.
 
@@ -71,16 +73,41 @@ cure"/"instant relief"/risk-free; no outcome promises; measured language only.
 category MUST be exactly one of: {categories}."""
 
 
+def _location_prompt_block() -> str:
+    """Mandatory local-SEO instructions, built from agent/locations.py. Appended in
+    code (not stored in content_prompt.txt) so editing the prompt on GitHub or via
+    Telegram /setprompt can never drop the location requirement."""
+    areas = ", ".join(locations.NEARBY_AREAS)
+    return (
+        f"LOCAL SEO — MANDATORY FOR EVERY POST (overrides anything looser above):\n"
+        f"- The clinic is in {locations.PRIMARY}, {locations.CITY}. \"{locations.PRIMARY}\" MUST "
+        f"appear in the title or meta_description, in the lede (first 1-2 sentences), and in "
+        f"at least one H2 heading.\n"
+        f"- The clinic also serves patients within about {locations.RADIUS_KM} km of "
+        f"{locations.PRIMARY}. Weave 3-5 of these nearby areas naturally into the body where "
+        f"they make sense (e.g. \"families in Whitefield and Gunjur\", \"a short drive from "
+        f"Sarjapur Road\"): {areas}.\n"
+        f"- Mention each area at most once or twice and never as a list of names — the full "
+        f"list of areas is added to the page automatically, so do NOT repeat it.\n"
+        f"- keywords: include 2-3 geo-modified long-tail phrases, e.g. "
+        f"\"homeopathy doctor near Whitefield\", \"homeopathic clinic {locations.PRIMARY}\".\n"
+        f"- Never state exact distances or travel times; say \"nearby\" or \"within about "
+        f"{locations.RADIUS_KM} km of {locations.PRIMARY}\".\n"
+        f"- gbp_summary: its first sentence must contain \"{locations.PRIMARY}\".")
+
+
 def _load_prompt() -> str:
     """Load the live content prompt from the repo file (editable on GitHub / via
-    Telegram), falling back to DEFAULT_PROMPT. Appends the fixed JSON-shape footer."""
+    Telegram), falling back to DEFAULT_PROMPT. Appends the mandatory local-SEO block
+    and the fixed JSON-shape footer."""
     try:
         base = open(config.PROMPT_FILE, encoding="utf-8").read().strip()
     except OSError:
         base = DEFAULT_PROMPT.strip()
     base = base.replace("{clinic}", config.CLINIC_NAME).replace(
         "{categories}", ", ".join(config.CATEGORIES))
-    return (base + "\n\nReply with ONE JSON object and NOTHING else — no markdown fences, "
+    return (base + "\n\n" + _location_prompt_block()
+            + "\n\nReply with ONE JSON object and NOTHING else — no markdown fences, "
             "no commentary.\nThe JSON must match this shape exactly:\n" + _SCHEMA)
 
 
@@ -158,11 +185,27 @@ def generate_post(topic: str, feedback: str = "") -> Post:
     raise RuntimeError(f"model did not return valid post JSON: {last_err}")
 
 
+def _with_service_area(text: str) -> str:
+    """Guarantee the GBP blurb names Varthur and the nearby service area. If the
+    model already worked Varthur + at least 3 nearby areas into the text, leave it
+    alone; otherwise append one short service-area sentence."""
+    low = text.lower()
+    hits = sum(1 for a in locations.NEARBY_AREAS if a.lower() in low)
+    if locations.PRIMARY.lower() in low and hits >= 3:
+        return text
+    text = text.rstrip()
+    if text and text[-1] not in ".!?":
+        text += "."
+    return (f"{text} Serving {locations.PRIMARY} and nearby areas within about "
+            f"{locations.RADIUS_KM} km, including {', '.join(locations.NEARBY_AREAS[:6])}.")
+
+
 def gbp_blurb(post: Post) -> str:
     """Plain-text blurb for the Google Business Profile post, with fallback when
     the model omitted gbp_summary. Runs the same YMYL safety scan as the blog
     gate (banned overclaims + remedy names); a safety hit falls back to the
-    meta description, which is already gate-checked inside the post HTML."""
+    meta description, which is already gate-checked inside the post HTML. The
+    chosen text always ends up carrying Varthur + the nearby service area."""
     from .. import check_post  # agent/ is a namespace package (no __init__.py needed)
     invite = ("Call Dr. Nafia's Homoeopathic Medical Centre in Varthur to "
               "discuss your case.")
@@ -177,8 +220,8 @@ def gbp_blurb(post: Post) -> str:
         bad = any(re.search(r"\b" + re.escape(w) + r"\b", low)
                   for w in check_post.BANNED + check_post.BANNED_REMEDY_NAMES)
         if not bad:
-            return text
-    return f"New on the DNH Care journal: {post.title}."
+            return _with_service_area(text)
+    return _with_service_area(f"New on the DNH Care journal: {post.title}.")
 
 
 def _esc(s: str) -> str:
@@ -199,7 +242,12 @@ def render_html(post: Post, recent_posts: List[dict]) -> str:
     cat_json = json.dumps(post.category)
     crumb_json = json.dumps(post.title)
     # SEO keywords: focus keyword first, then related — deduped, order-preserving
-    kw_raw = [k.strip() for k in ([post.focus_keyword] + list(post.keywords)) if k and k.strip()]
+    # Deterministic geo keywords, added after the model's own so they never crowd them out.
+    geo_kw = ([f"homeopathy clinic {locations.PRIMARY}",
+               f"homeopathy doctor {locations.PRIMARY} {locations.CITY}"]
+              + [f"homeopathy doctor near {a}" for a in locations.NEARBY_AREAS[:4]])
+    kw_raw = [k.strip() for k in ([post.focus_keyword] + list(post.keywords) + geo_kw)
+              if k and k.strip()]
     _seen = set()
     kw_list = [k for k in kw_raw if not (k.lower() in _seen or _seen.add(k.lower()))]
     keywords_str = ", ".join(kw_list)
@@ -211,6 +259,30 @@ def render_html(post: Post, recent_posts: List[dict]) -> str:
          "acceptedAnswer": {"@type": "Answer", "text": f.answer}}
         for f in post.faqs
     ], indent=4, ensure_ascii=False)
+
+    # Area the post covers: Varthur plus a 10 km radius (schema.org GeoCircle, radius in metres).
+    content_location_json = json.dumps({
+        "@type": "Place",
+        "name": f"{locations.PRIMARY}, {locations.CITY}",
+        "geo": {
+            "@type": "GeoCircle",
+            "geoMidpoint": {"@type": "GeoCoordinates",
+                            "latitude": locations.CENTER_LAT,
+                            "longitude": locations.CENTER_LNG},
+            "geoRadius": locations.RADIUS_KM * 1000,
+        },
+    }, indent=6)
+    # On-page "areas served" section — ALWAYS rendered, so every post names Varthur and
+    # every nearby area whatever the model wrote. Wrapped in .areas-served so the gate
+    # can exclude it from the thin-content word count.
+    areas = locations.NEARBY_AREAS
+    areas_sentence = ", ".join(areas[:-1]) + f" and {areas[-1]}"
+    areas_html = f"""    <div class="areas-served">
+      <h2>Homeopathy care in {locations.PRIMARY} and nearby areas</h2>
+      <p>{_esc(config.CLINIC_NAME)} is at {_esc(config.ADDRESS_LINE)}. We see patients from
+      {locations.PRIMARY} and from the neighbourhoods within about {locations.RADIUS_KM} km of it,
+      including {_esc(areas_sentence)}.</p>
+    </div>"""
 
     sections_html = []
     for s in post.sections:
@@ -252,6 +324,7 @@ def render_html(post: Post, recent_posts: List[dict]) -> str:
     "dateModified": "{today}",
     "articleSection": {cat_json},
     "keywords": {keywords_json},
+    "contentLocation": {content_location_json},
     "url": "https://dnhcare.co.in/blog/{post.slug}",
     "mainEntityOfPage": "https://dnhcare.co.in/blog/{post.slug}",
     "author": {{
@@ -293,6 +366,8 @@ def render_html(post: Post, recent_posts: List[dict]) -> str:
     <div class="faqs">
 {faqs_html}
     </div>
+
+{areas_html}
 
     <div class="med-disclaimer">
       This article is general information, not medical advice, and does not replace a
