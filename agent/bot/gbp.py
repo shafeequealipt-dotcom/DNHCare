@@ -15,6 +15,9 @@ from . import config
 
 TOKEN_URL = "https://oauth2.googleapis.com/token"
 API_BASE = "https://mybusiness.googleapis.com/v4"
+# Business Information v1 — the live surface for listing fields (services,
+# description, categories, website); v4 still serves posts and reviews.
+BI_BASE = "https://mybusinessbusinessinformation.googleapis.com/v1"
 SUMMARY_LIMIT = 1500  # GBP hard limit for LocalPost.summary
 
 
@@ -56,11 +59,12 @@ def _access_token() -> str:
         raise RuntimeError(f"GBP token refresh {e.code}: {detail}{hint}") from e
 
 
-def _api(method: str, path: str, payload: dict | None = None) -> dict:
-    """Authenticated JSON call against the Business Profile v4 API."""
+def _api(method: str, path: str, payload: dict | None = None,
+         base: str = API_BASE) -> dict:
+    """Authenticated JSON call against the Business Profile API (v4 by default)."""
     data = json.dumps(payload).encode() if payload is not None else None
     req = urllib.request.Request(
-        API_BASE + path, data=data, method=method,
+        base + path, data=data, method=method,
         headers={"Authorization": f"Bearer {_access_token()}",
                  "Content-Type": "application/json"})
     try:
@@ -124,3 +128,45 @@ def create_local_post(summary: str, blog_url: str) -> str:
 def delete_local_post(name: str):
     """Delete a local post by its resource name (used by the live smoke test)."""
     _api("DELETE", "/" + name.lstrip("/"))
+
+
+# ---- listing fields (Business Information v1) ----
+
+def get_location(read_mask: str) -> dict:
+    """Read listing fields, e.g. get_location("serviceItems,profile")."""
+    path = f"/locations/{config.GBP_LOCATION_ID}?readMask={read_mask}"
+    return _api("GET", path, base=BI_BASE)
+
+
+def patch_location(update_mask: str, body: dict, validate_only: bool = False) -> dict:
+    """Write listing fields. validate_only asks Google to check the edit without
+    applying it. Edits to the live listing may sit in Google review for a while."""
+    path = f"/locations/{config.GBP_LOCATION_ID}?updateMask={update_mask}"
+    if validate_only:
+        path += "&validateOnly=true"
+    return _api("PATCH", path, body, base=BI_BASE)
+
+
+def service_names() -> list:
+    """Display names of the listing's free-form services, in listing order."""
+    items = get_location("serviceItems").get("serviceItems", [])
+    return [s["freeFormServiceItem"]["label"]["displayName"]
+            for s in items if "freeFormServiceItem" in s]
+
+
+def add_service_item(name: str, description: str,
+                     category_id: str = "gcid:homeopath") -> bool:
+    """Append one free-form service. The API only replaces the whole list, so the
+    current items are read and resent with the new one. Returns False if a
+    service with that name already exists."""
+    items = get_location("serviceItems").get("serviceItems", [])
+    have = {s["freeFormServiceItem"]["label"]["displayName"].lower()
+            for s in items if "freeFormServiceItem" in s}
+    if name.lower() in have:
+        return False
+    items.append({"freeFormServiceItem": {
+        "category": f"categories/{category_id}",
+        "label": {"displayName": name, "description": description[:300],
+                  "languageCode": "en"}}})
+    patch_location("serviceItems", {"serviceItems": items})
+    return True

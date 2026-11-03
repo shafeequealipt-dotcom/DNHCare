@@ -3,7 +3,11 @@ Workers AI for
 content generation, runtime-switchable model persisted in state.json."""
 import os
 import json
+import datetime
+from zoneinfo import ZoneInfo
 from dotenv import load_dotenv
+
+IST = ZoneInfo("Asia/Kolkata")
 
 # Load agent/bot/.env (does NOT override real system env vars).
 load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env"))
@@ -101,6 +105,25 @@ CATEGORY_SERVICE = {
 }
 CATEGORIES = list(CATEGORY_SERVICE.keys())
 
+# GBP service (exact listing name) -> blog category, for the auto-picker's
+# service rotation. Only services a category's service page covers are listed;
+# digestive, urinary etc. need their own category + page before they can rotate.
+SERVICE_CATEGORY = {
+    "Skin Treatment": "Skin", "Eczema": "Skin", "Psoriasis": "Skin", "Vitiligo": "Skin",
+    "Acne & Pimples": "Skin", "Hair Loss & Hair Fall": "Skin", "Dandruff": "Skin",
+    "Fungal Infections (Ringworm & Nail)": "Skin", "Corns, Calluses & Warts": "Skin",
+    "Excess Sweating (Hyperhidrosis)": "Skin",
+    "Allergy Treatment": "Allergies", "Sinusitis & Nasal Polyp": "Allergies",
+    "Asthma": "Allergies", "Lung Diseases": "Allergies",
+    "Eye Complaints (Stye & Chalazion)": "Allergies",
+    "Child Homeopathy": "Children", "Tonsillitis & Adenoids": "Children",
+    "Frequent Cold & Fever": "Children",
+    "Migraine & Chronic Headache": "Migraine", "Vertigo": "Migraine", "Tinnitus": "Migraine",
+    "Women's Health": "Women", "PCOS": "Women", "Thyroid": "Women", "Fibroids": "Women",
+    "Infertility": "Women",
+}
+SERVICE_ROTATION_DAYS = 30  # a service isn't the focus again within this many days
+
 
 # ---- runtime model state (switchable from Telegram) ----
 def _read_state():
@@ -178,7 +201,8 @@ def set_gbp_cta(v: str) -> str:
 def record_gbp_post(title: str, resource_name: str):
     state = _read_state()
     posts = state.get("gbp_posts", [])
-    posts.insert(0, {"title": title, "name": resource_name})
+    posts.insert(0, {"title": title, "name": resource_name,
+                     "date": datetime.datetime.now(IST).date().isoformat()})
     state["gbp_posts"] = posts[:15]
     with open(STATE_FILE, "w", encoding="utf-8") as f:
         json.dump(state, f)
@@ -186,6 +210,39 @@ def record_gbp_post(title: str, resource_name: str):
 
 def get_gbp_posts(n: int = 5) -> list:
     return _read_state().get("gbp_posts", [])[:n]
+
+
+def gbp_posted_today() -> bool:
+    """True if a GBP post already went out today (IST date stored per post)."""
+    today = datetime.datetime.now(IST).date().isoformat()
+    return any(p.get("date") == today for p in get_gbp_posts(15))
+
+
+# ---- service rotation: last date each GBP service was the focus of a post ----
+def get_service_posts() -> dict:
+    return _read_state().get("service_posts", {})
+
+
+def record_service_post(service: str):
+    state = _read_state()
+    sp = state.get("service_posts", {})
+    sp[service] = datetime.datetime.now(IST).date().isoformat()
+    state["service_posts"] = sp
+    with open(STATE_FILE, "w", encoding="utf-8") as f:
+        json.dump(state, f)
+
+
+# ---- keyword-report suggestions awaiting /gbp apply <n> ----
+def set_pending_services(items: list) -> list:
+    state = _read_state()
+    state["pending_services"] = list(items)
+    with open(STATE_FILE, "w", encoding="utf-8") as f:
+        json.dump(state, f)
+    return state["pending_services"]
+
+
+def get_pending_services() -> list:
+    return _read_state().get("pending_services", [])
 
 
 # ---- daily post WINDOW (switchable from Telegram), persisted ----

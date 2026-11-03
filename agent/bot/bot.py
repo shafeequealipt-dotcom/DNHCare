@@ -112,7 +112,13 @@ async def _publish_and_notify(context: ContextTypes.DEFAULT_TYPE, post, html, to
         await context.bot.send_message(chat_id, f"⚠️ Publish failed: {e}")
         return
     await context.bot.send_message(chat_id, f"✅ Published — live in ~1–2 min:\n{url}")
-    if gbp.is_enabled():
+    if gbp.is_enabled() and config.gbp_posted_today():
+        # One GBP post a day: extra /generate runs still publish the blog, but a
+        # burst of same-day posts on the listing looks spammy.
+        await context.bot.send_message(
+            chat_id, "📍 Skipped the Google Business Profile post — one already "
+                     "went out today.")
+    elif gbp.is_enabled():
         clean_url = f"https://dnhcare.co.in/blog/{post.slug}"
         try:
             gbp_name = await asyncio.to_thread(
@@ -175,6 +181,8 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "/gbp cta call | learn\n"
         "/report – GBP weekly performance + search-keyword digest, on demand "
         "(also sent automatically)\n"
+        "/keywords – last month's search phrases vs the listing's services "
+        "(also sent on the 10th); /gbp apply <n> adds a suggested service\n"
         "/time – show the daily post window + next scheduled run\n"
         "/settime HH:MM-HH:MM – set the daily post window (IST)\n"
         "/prompt – show the content-generation prompt\n"
@@ -342,6 +350,9 @@ async def cmd_gbp(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not _only_owner(update):
         return
     arg = (" ".join(context.args)).strip().lower()
+    if arg.startswith("apply"):
+        await _apply_suggested_service(update, arg[5:].strip())
+        return
     if arg in ("on", "off"):
         config.set_gbp_enabled(arg == "on")
     elif arg.startswith("cta"):
@@ -368,6 +379,66 @@ async def cmd_gbp(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "On every auto-publish, the blog post is shared to the clinic's Google "
         "listing too.\nToggle with /gbp on | /gbp off.\n"
         "Switch button with /gbp cta call | /gbp cta learn.")
+
+
+async def _apply_suggested_service(update: Update, arg: str):
+    """/gbp apply <n> — add suggestion n from the last /keywords report to the
+    listing's services. The only path from the report to a live write."""
+    pending = config.get_pending_services()
+    if not pending:
+        await update.message.reply_text("No suggested services — run /keywords first.")
+        return
+    if not arg.isdigit() or not (1 <= int(arg) <= len(pending)):
+        await update.message.reply_text(
+            f"Usage: /gbp apply <number>  (1–{len(pending)}, from the last /keywords report)")
+        return
+    s = pending[int(arg) - 1]
+    try:
+        added = await asyncio.to_thread(gbp.add_service_item, s["name"], s["description"])
+    except Exception as e:  # noqa
+        log.exception("adding GBP service failed")
+        await update.message.reply_text(f"⚠️ Couldn't add the service: {e}")
+        return
+    await update.message.reply_text(
+        f"✅ Added service “{s['name']}” — Google may review it before it shows."
+        if added else f"“{s['name']}” is already on the listing.")
+
+
+async def _send_keyword_report(context: ContextTypes.DEFAULT_TYPE):
+    """Monthly keyword check (also /keywords). Isolated like the weekly digest."""
+    chat_id = config.TELEGRAM_CHAT_ID
+    if not gbp.is_configured():
+        return
+    try:
+        text, suggestions = await asyncio.to_thread(insights.keyword_report)
+    except Exception as e:  # noqa
+        log.exception("keyword report failed")
+        await context.bot.send_message(chat_id, f"⚠️ Monthly keyword report failed: {e}")
+        return
+    config.set_pending_services(suggestions)
+    await context.bot.send_message(chat_id, text, parse_mode=ParseMode.HTML)
+
+
+def _schedule_keyword_report(job_queue):
+    for j in job_queue.get_jobs_by_name("monthly_keyword_report"):
+        j.schedule_removal()
+    hh, mm = (int(x) for x in config.REPORT_TIME.split(":"))
+    # The 10th: Google's keyword numbers for the previous month usually land in
+    # the first week; keyword_report falls back a month if they haven't.
+    job_queue.run_monthly(_send_keyword_report, when=datetime.time(hh, mm, tzinfo=IST),
+                          day=10, name="monthly_keyword_report")
+
+
+async def cmd_keywords(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not _only_owner(update):
+        return
+    if not gbp.is_configured():
+        await update.message.reply_text(
+            "Google Business Profile is not configured — no keywords to check. "
+            "See /gbp for setup.")
+        return
+    await update.message.reply_text("🔎 Checking last month's search keywords…")
+    await _send_keyword_report(context)
 
 
 async def cmd_generate(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -528,6 +599,7 @@ def main():
     app.add_handler(CommandHandler("setmodel", cmd_setmodel))
     app.add_handler(CommandHandler("gbp", cmd_gbp))
     app.add_handler(CommandHandler("report", cmd_report))
+    app.add_handler(CommandHandler("keywords", cmd_keywords))
     app.add_handler(CommandHandler("time", cmd_time))
     app.add_handler(CommandHandler("settime", cmd_settime))
     app.add_handler(CommandHandler("prompt", cmd_prompt))
@@ -538,6 +610,7 @@ def main():
     _schedule_watchdog(app.job_queue)
     if gbp.is_configured():
         _schedule_weekly_report(app.job_queue)
+        _schedule_keyword_report(app.job_queue)
     log.info("DNH Care bot started. Next auto-post at %s IST. Publishing to '%s'.",
              when.strftime("%Y-%m-%d %H:%M"), config.PUBLISH_BRANCH)
     app.run_polling(allowed_updates=Update.ALL_TYPES)

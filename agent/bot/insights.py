@@ -180,6 +180,132 @@ def suggest_topics(keywords: list, review_avg: float, n: int = 3) -> list:
     return lines[:n]
 
 
+def _keywords_for_month(year: int, month: int, n: int = 60) -> dict:
+    """{keyword: impressions} for one calendar month. Phrases below Google's
+    privacy threshold come back as the threshold (e.g. 15)."""
+    loc = f"locations/{config.GBP_LOCATION_ID}"
+    data = _perf_get(f"{loc}/searchkeywords/impressions/monthly",
+                     {"monthlyRange.start_month.year": year,
+                      "monthlyRange.start_month.month": month,
+                      "monthlyRange.end_month.year": year,
+                      "monthlyRange.end_month.month": month,
+                      "pageSize": 100})
+    out = {}
+    for row in data.get("searchKeywordsCounts", []):
+        vals = row.get("insightsValue", {})
+        try:
+            out[row.get("searchKeyword", "")] = int(vals.get("value") or vals.get("threshold", 0))
+        except (TypeError, ValueError):
+            continue
+    return dict(sorted(out.items(), key=lambda x: -x[1])[:n])
+
+
+# Words that say nothing about WHAT someone needs — ignored when checking whether
+# a search phrase is covered by a service or the description.
+_GENERIC = {"homeopathy", "homeopathic", "homoeopathic", "homeopath", "clinic", "doctor",
+            "near", "best", "bangalore", "bengaluru", "hospital", "medical", "centre",
+            "center", "treatment", "specialist", "medicine", "varthur", "whitefield",
+            "gunjur", "road", "main", "school", "karnataka", "nafia", "top", "good",
+            "homeo", "oppst"}
+# Search words patients use for something a service already covers.
+_SYNONYMS = {"dermatologist": "skin", "derma": "skin", "pediatrician": "child",
+             "paediatrician": "child", "gynaecologist": "women", "gynecologist": "women",
+             "piles": "pile", "hemorrhoid": "pile", "haemorrhoid": "pile"}
+
+
+def _need_words(phrase: str) -> set:
+    return {_SYNONYMS.get(w, w) for w in topics._words(phrase)} - _GENERIC
+
+
+def keyword_report() -> tuple:
+    """Monthly keyword-to-listing check. Compares last month's search phrases with
+    the month before (rising terms), finds condition phrases no service or the
+    description covers (gaps), and asks the model for up to 3 new services to
+    close them. Returns (html_text, suggestions); suggestions are
+    [{"name", "description"}] for /gbp apply <n> — nothing is written here."""
+    def prev_month(d):
+        return d.replace(day=1) - datetime.timedelta(days=1)
+
+    m1 = prev_month(datetime.date.today())                   # last full month
+    now = _keywords_for_month(m1.year, m1.month)
+    if not now:
+        # Google publishes a month's keywords some days after it ends — fall
+        # back to the latest month that has data.
+        m1 = prev_month(m1)
+        now = _keywords_for_month(m1.year, m1.month)
+    m2 = prev_month(m1)
+    before = _keywords_for_month(m2.year, m2.month)
+    services = gbp.service_names()
+    desc = gbp.get_location("profile").get("profile", {}).get("description", "")
+    covered = topics._words(" ".join(services) + " " + desc) - _GENERIC
+
+    # People searching the clinic's own name or address aren't a content signal.
+    now = {k: c for k, c in now.items() if "nafia" not in k.lower()}
+    rising = [(k, c) for k, c in now.items() if c > before.get(k, 0)][:8]
+    gaps = []
+    for k, c in now.items():
+        need = _need_words(k)
+        if need and not need & covered:
+            gaps.append((k, c))
+
+    lines = [f"🔎 <b>Keyword check — {m1.strftime('%B %Y')}</b>", ""]
+    lines.append("📈 Rising: " + (", ".join(f"{k} ({before.get(k, 0)}→{c})"
+                                          for k, c in rising) or "—"))
+    lines.append("🕳 Not covered by any service or the description: "
+                 + (", ".join(f"{k} ({c})" for k, c in gaps[:10]) or "none 👍"))
+
+    suggestions = []
+    if gaps:
+        try:
+            suggestions = _suggest_services(gaps[:10], services)
+        except Exception:  # noqa
+            suggestions = []
+    if suggestions:
+        lines.append("")
+        lines.append("💡 <b>Suggested new services</b> — /gbp apply &lt;n&gt; to add one:")
+        for i, s in enumerate(suggestions, 1):
+            lines.append(f"  {i}. <b>{s['name']}</b> — {s['description']}")
+    return "\n".join(lines), suggestions
+
+
+def _suggest_services(gaps: list, services: list) -> list:
+    """Ask the model for up to 3 service entries that honestly cover the gap
+    phrases. Returns [{"name", "description"}]."""
+    resp = llm.chat(messages=[{
+        "role": "user",
+        "content": (
+            "A homeopathy clinic in Varthur, Bengaluru lists these services on its "
+            f"Google Business Profile: {', '.join(services)}.\n"
+            "People found the clinic with these search phrases, which no service "
+            "covers yet (phrase — impressions):\n"
+            + "\n".join(f"- {k} ({c})" for k, c in gaps)
+            + "\n\nPropose up to 3 NEW services, only for phrases about a health "
+            "condition or symptom a homeopath treats (skip directions, places, "
+            "pharmacies, other medical specialities and anything not a health "
+            "need). Name = the condition in plain words, max 40 characters, no place "
+            "names, no 'best/top/near me', no specialist titles. Description = one "
+            "or two sentences, max 250 characters, starting 'Homeopathic care for', "
+            "no cure or result claims.\n"
+            "Reply with one line per service and nothing else, in this format:\n"
+            "Name | Description\n"
+            "If none qualify, reply NONE."
+        ),
+    }], temperature=0.3, max_tokens=400)
+    text = (resp.choices[0].message.content or "").strip()
+    have = [topics._words(s) for s in services]
+    out = []
+    for line in text.splitlines():
+        name, sep, d = line.strip().lstrip("-0123456789. ").partition("|")
+        name, d = name.strip(), d.strip()
+        words = topics._words(name)
+        # Skip near-duplicates, e.g. "Excess Sweating" vs "Excess Sweating (Hyperhidrosis)".
+        if any(words <= h or h <= words for h in have if h):
+            continue
+        if sep and name and d and len(name) <= 40:
+            out.append({"name": name, "description": d[:300]})
+    return out[:3]
+
+
 def build_digest() -> tuple:
     """Assemble the weekly Telegram digest. Returns (html_text, suggested_topics).
     Every section degrades gracefully — a failed API call shows '—' rather than
