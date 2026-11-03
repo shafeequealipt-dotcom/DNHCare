@@ -15,18 +15,18 @@ Read `CAVEMAN.md` first for all brand facts, then follow these steps exactly.
 2. **Pick topic.** Open `agent/topics.md`. Take the FIRST topic under "Queue" not in "Done".
    Rotate category vs the last "Done" entry if possible.
 
-3. **Write the post.** Copy an existing file in `/blog/` (e.g. `dust-allergy-season.html`) as the
-   structural template — it already has nav, schema blocks, scroll bar, footer, action bar.
-   Create `blog/<slug>.html` (slug = short, hyphenated, keyword-bearing, .html). Then fill in:
+3. **Write the post.** Render it with `agent/bot/journal_template.py` (`article_page`), the
+   black-and-gold Journal template the bot uses — do not hand-copy an old post. Create
+   `blog/<slug>.html` (slug = short, hyphenated, keyword-bearing, .html). Then fill in:
    - `<title>` (≤ 60 chars, end with "| DNH Care Journal"), meta description (140–158 chars).
-   - canonical + og:url = `https://dnhcare.co.in/blog/<slug>` (CLEAN URL, no .html — Nginx serves it).
+   - canonical + og:url = `https://dnhcare.co.in/blog/<slug>` (CLEAN URL, no .html).
    - BlogPosting schema: headline, datePublished + dateModified = today, articleSection = category,
      author Dr. Nafia M, publisher clinic @id. BreadcrumbList: Home › Journal › title.
-   - article-hero: breadcrumb, `.post-cat-tag` (the category), `<h1>`, `.post-meta` (By Dr. Nafia M · date · N min read).
+   - hero: category, `<h1>`, meta line (By Dr. Nafia M · 03 Nov 2026 · N min read).
    - body in `<main class="article">`: a `.lede` opener, 3–4 `<h2>` sections of genuinely useful,
      LOCAL, original content (mention Varthur / Whitefield / Bengaluru context where natural),
-     a `.med-disclaimer`, the `.author-box`, a `.cta-row` (Book + link to the matching service page),
-     and a `.related` block linking 2 other posts + 1 service page.
+     a `.med-disclaimer`, the `.author-box`, a `.cta-row` (Book + `../<service-page>`),
+     and a `.related` block linking 2 other posts + 1 service page (`../<service-page>`).
    - TARGET 600–900 words of real value. No fluff, no repetition of other posts.
 
 4. **Tone + safety (non-negotiable, YMYL):**
@@ -39,7 +39,8 @@ Read `CAVEMAN.md` first for all brand facts, then follow these steps exactly.
    - Include the red-flag / see-a-doctor note inside `.med-disclaimer` where relevant.
 
 5. **Wire it in:**
-   - Add a `<a class="post-card">` to `blog/index.html` inside `#posts` as the NEWEST (first) card.
+   - Add a `journal_template.card(...)` first in `blog/index.html` (`add_to_journal`) and in the
+     home page's latest row (`add_to_home`, prefix `blog/`).
    - Add `<loc>https://dnhcare.co.in/blog/<slug></loc>` to `sitemap.xml` (clean URL, no .html).
    - Move the topic to "Done" (with date + filename) in `agent/topics.md`. If queue < 5 left, add 10 new ideas.
 

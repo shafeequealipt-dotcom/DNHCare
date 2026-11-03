@@ -8,7 +8,7 @@ import datetime
 from typing import List
 import openai
 from pydantic import BaseModel, Field, ValidationError
-from . import config, llm
+from . import config, journal_template, llm
 
 
 class Section(BaseModel):
@@ -186,13 +186,13 @@ def _esc(s: str) -> str:
 
 
 def render_html(post: Post, recent_posts: List[dict]) -> str:
-    """recent_posts: list of {slug, title, category} for the 'Keep reading' block."""
+    """recent_posts: list of {slug, title, category} for the 'Keep reading' block.
+    The page uses the black-and-gold Journal template (journal_template.py)."""
     today = datetime.date.today().isoformat()
     svc_file, svc_label = config.CATEGORY_SERVICE[post.category]
     svc_url = svc_file.removesuffix('.html')
     title_t = _esc(post.title)
     meta = _esc(post.meta_description)
-    crumb_title = _esc(post.title)
     # JSON-encoded values for the <script type="application/ld+json"> blocks
     title_json = json.dumps(post.title)
     meta_json = json.dumps(post.meta_description)
@@ -228,30 +228,19 @@ def render_html(post: Post, recent_posts: List[dict]) -> str:
         f"      <details><summary>{_esc(f.question)}</summary>"
         f"<p>{_esc(f.answer)}</p></details>" for f in post.faqs)
 
-    related = [f'        <a href="{svc_url}"><span>Treatment</span>{_esc(svc_label)}</a>']
+    # Service link needs ../ — posts live in /blog/ and the service pages at the root.
+    related = [f'        <a href="../{svc_url}"><span>Treatment</span>{_esc(svc_label)}</a>']
     for rp in recent_posts[:2]:
         related.append(
             f'        <a href="{rp["slug"]}"><span>{_esc(rp["category"])}</span>'
             f'{_esc(rp["title"])}</a>')
     related_html = "\n".join(related)
 
-    return f"""<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>{title_t} | DNH Care Journal</title>
-  <meta name="description" content="{meta}" />
-  <meta name="keywords" content="{keywords_meta}" />
-  <link rel="canonical" href="https://dnhcare.co.in/blog/{post.slug}" />
+    head_extra = f"""  <meta name="keywords" content="{keywords_meta}" />
   <meta property="og:type" content="article" />
   <meta property="og:url" content="https://dnhcare.co.in/blog/{post.slug}" />
   <meta property="og:title" content="{title_t}" />
   <meta property="og:description" content="{meta}" />
-  <link rel="icon" href="../favicon.svg" type="image/svg+xml" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,500&family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../styles.css?v=2" />
   <script type="application/ld+json">
   {{
     "@context": "https://schema.org",
@@ -294,46 +283,9 @@ def render_html(post: Post, recent_posts: List[dict]) -> str:
     "@type": "FAQPage",
     "mainEntity": {faq_schema_items}
   }}
-  </script>
-</head>
-<body>
-  <div class="scroll-progress" aria-hidden="true"><b></b></div>
+  </script>"""
 
-  <nav class="nav">
-    <a class="brand" href="../">DNH<span> CARE</span><em>Dr. Nafia's Homoeopathic Medical Centre</em></a>
-    <div class="nav-links">
-      <a href="../#about">About</a>
-      <div class="nav-drop">
-        <a href="../#services">Treatments &#9662;</a>
-        <div class="drop-menu">
-          <a href="../skin-treatment">Skin Complaints</a>
-          <a href="../allergy-treatment">Allergies &amp; Sinusitis</a>
-          <a href="../pediatric-care">Pediatric Care</a>
-          <a href="../migraine-treatment">Migraine &amp; Headaches</a>
-          <a href="../womens-health">Women's Health &amp; Thyroid</a>
-        </div>
-      </div>
-      <a href="./">Journal</a>
-      <a href="../#visit">Visit</a>
-    </div>
-    <a class="nav-cta" href="https://wa.me/919663779358" target="_blank" rel="noopener">Book on WhatsApp</a>
-  </nav>
-
-  <header class="article-hero">
-    <nav class="crumbs" aria-label="Breadcrumb">
-      <a href="../">Home</a> &rsaquo; <a href="./">Journal</a> &rsaquo; {crumb_title}
-    </nav>
-    <span class="post-cat-tag">{post.category}</span>
-    <h1>{title_t}</h1>
-    <div class="post-meta">
-      <span class="by">By Dr. Nafia M</span><span class="dot">&middot;</span>
-      <span>{today}</span><span class="dot">&middot;</span>
-      <span>{post.read_minutes} min read</span>
-    </div>
-  </header>
-
-  <main class="article">
-    <p class="lede">{_esc(post.lede)}</p>
+    body = f"""    <p class="lede">{_esc(post.lede)}</p>
 
 {sections_html}
 
@@ -351,7 +303,7 @@ def render_html(post: Post, recent_posts: List[dict]) -> str:
     </div>
 
     <div class="cta-row">
-      <a class="big-cta" href="https://wa.me/919663779358" target="_blank" rel="noopener">Book a consultation</a>
+      <a class="big-cta" href="{config.WA}" target="_blank" rel="noopener">Book a consultation</a>
       <a class="back-link" href="../{svc_url}">{_esc(svc_label)} &rarr;</a>
     </div>
 
@@ -370,47 +322,10 @@ def render_html(post: Post, recent_posts: List[dict]) -> str:
       <div class="related-row">
 {related_html}
       </div>
-    </div>
-  </main>
+    </div>"""
 
-  <div class="footer-grid">
-    <div>
-      <h5>Dr. Nafia's Homoeopathic Medical Centre</h5>
-      <p>Opp. KK School, Gunjur Main Road, Varthur,<br/>Bengaluru, Karnataka 560087<br/>
-      <a href="tel:+919663779358">+91 96637 79358</a> &middot; Mon&ndash;Sat, 10am&ndash;1pm &amp; 4pm&ndash;8pm</p>
-    </div>
-    <div>
-      <h5>Treatments</h5>
-      <ul>
-        <li><a href="../skin-treatment">Skin complaints</a></li>
-        <li><a href="../allergy-treatment">Allergies &amp; sinusitis</a></li>
-        <li><a href="../pediatric-care">Pediatric care</a></li>
-        <li><a href="../migraine-treatment">Migraine &amp; headaches</a></li>
-        <li><a href="../womens-health">Women's health &amp; thyroid</a></li>
-      </ul>
-    </div>
-    <div>
-      <h5>Areas served</h5>
-      <ul><li>Varthur</li><li>Gunjur</li><li>Whitefield</li><li>Sarjapur Road</li><li>Balagere</li></ul>
-    </div>
-  </div>
-  <footer class="footer">
-    <span>&copy; 2026 Dr. Nafia's Homoeopathic Medical Centre (DNH Care) &middot; Healing, the gentle way.</span>
-  </footer>
-
-  <div class="action-bar">
-    <a href="tel:+919663779358"><strong>Call</strong></a>
-    <a href="https://wa.me/919663779358" target="_blank" rel="noopener"><strong>WhatsApp</strong></a>
-    <a href="https://www.google.com/maps/dir/?api=1&destination=Dr.+Nafia's+Homoeopathic+Medical+Centre+Gunjur+Main+Road+Varthur+Bengaluru" target="_blank" rel="noopener"><strong>Directions</strong></a>
-  </div>
-
-  <script>
-    addEventListener("scroll", () => {{
-      const b = document.querySelector(".scroll-progress b");
-      const max = document.documentElement.scrollHeight - innerHeight;
-      if (b) b.style.width = (max > 0 ? (scrollY / max) * 100 : 0) + "%";
-    }}, {{ passive: true }});
-  </script>
-</body>
-</html>
-"""
+    return journal_template.article_page(
+        title=post.title, description=post.meta_description,
+        canonical=f"https://dnhcare.co.in/blog/{post.slug}", category=post.category,
+        meta_line=f"By Dr. Nafia M · {datetime.date.today():%d %b %Y} · {post.read_minutes} min read",
+        body=body, head_extra=head_extra)
