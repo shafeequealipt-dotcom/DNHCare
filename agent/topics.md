@@ -13,6 +13,7 @@ Bengaluru). Keep each post original, locally useful, and tied to a service page.
 
 
 ## Done (most recent first)
+- 2026-11-05 [Allergies] Managing Asthma Triggers During Bengaluru's Festival Season: Homeopathic Approaches to Coping with Poor Air Quality  -> asthma-management-during-festivals-in-varthur.html
 - 2026-11-04 [Allergies] Relieving Sinus Pressure from Festival Smoke and Poor Air Quality in Bengaluru  -> homeopathy-for-sinus-pressure-varthur.html
 - 2026-11-03 [Women] Navigating Monsoon-Related Changes in Hormonal Balance: A Homeopathic Perspective on Adapting to Bengaluru's Humid Climate through Mindful Menstrual Cycle Tracking and Nutrition.  -> homeopathy-for-women-in-bengaluru-monsoon.html
 - 2026-11-03 [Children] Navigating Monsoon-Related Changes in Kids' Musical Preferences: A Homeopathic Perspective on How Music Therapy Can Support Emotional Expression and Cognitive Development in Bengaluru's Indoor Season.  -> homeopathy-for-kids-in-bengaluru-monsoon.html
