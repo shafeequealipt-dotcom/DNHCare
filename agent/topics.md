@@ -13,6 +13,7 @@ Bengaluru). Keep each post original, locally useful, and tied to a service page.
 
 
 ## Done (most recent first)
+- 2026-11-07 [Skin] Dry skin from festival fireworks smoke: homeopathic remedies for relief in Bengaluru's cool transition.  -> dry-skin-relief-from-fireworks-smoke.html
 - 2026-11-06 [Children] Homeopathic Approaches to Managing Tonsillitis in Kids During Bengaluru's Festival Season: How Air Pollution Affects Recovery and Recurrence.  -> tonsillitis-in-kids-homeopathy-varthur.html
 - 2026-11-05 [Children] Homeopathic Approaches to Soothing Monsoon-Triggered Sore Throats in Kids: A Guide to Natural Remedies and Comforting Care.  -> homeopathy-for-sore-throats-in-kids.html
 - 2026-11-05 [Allergies] Managing Asthma Triggers During Bengaluru's Festival Season: Homeopathic Approaches to Coping with Poor Air Quality  -> asthma-management-during-festivals-in-varthur.html
