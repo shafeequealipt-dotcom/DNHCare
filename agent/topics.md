@@ -13,6 +13,7 @@ Bengaluru). Keep each post original, locally useful, and tied to a service page.
 
 
 ## Done (most recent first)
+- 2026-11-08 [Skin] Homeopathic approaches to reducing acne flare-ups triggered by festival smoke and poor air quality in Bengaluru.  -> homeopathy-for-acne-in-varthur.html
 - 2026-11-07 [Skin] Psoriasis and festival smoke: reducing flare-ups during Bengaluru's cool transition.  -> psoriasis-treatment-varthur.html
 - 2026-11-07 [Skin] Eczema and dry air: how Bengaluru's northeast monsoon transition affects skin moisture and homeopathic care.  -> eczema-homeopathy-varthur.html
 - 2026-11-07 [Skin] Dry skin from festival fireworks smoke: homeopathic remedies for relief in Bengaluru's cool transition.  -> dry-skin-relief-from-fireworks-smoke.html
