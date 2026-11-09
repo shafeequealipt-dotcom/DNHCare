@@ -13,6 +13,7 @@ Bengaluru). Keep each post original, locally useful, and tied to a service page.
 
 
 ## Done (most recent first)
+- 2026-11-09 [Skin] Homeopathic Approaches to Managing Cracked Heels and Foot Calluses Exacerbated by Bengaluru's Cool and Dry Transition.  -> homeopathy-for-cracked-heels-varthur.html
 - 2026-11-09 [Skin] Fungal nail infections in Bengaluru's cool transition: homeopathic approaches to prevention and treatment.  -> fungal-nail-infections-homeopathy-varthur.html
 - 2026-11-09 [Skin] Dandruff in Bengaluru's cool transition: homeopathic approaches to soothing dry, itchy scalps.  -> dandruff-homeopathy-varthur.html
 - 2026-11-08 [Skin] Hair Loss from Monsoon-Triggered Dandruff and Scalp Irritation: Homeopathic Remedies for Relief in Bengaluru's Humid Climate  -> monsoon-hair-loss-homeopathy-varthur.html
