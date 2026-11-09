@@ -13,6 +13,7 @@ Bengaluru). Keep each post original, locally useful, and tied to a service page.
 
 
 ## Done (most recent first)
+- 2026-11-09 [Skin] Dandruff in Bengaluru's cool transition: homeopathic approaches to soothing dry, itchy scalps.  -> dandruff-homeopathy-varthur.html
 - 2026-11-08 [Skin] Hair Loss from Monsoon-Triggered Dandruff and Scalp Irritation: Homeopathic Remedies for Relief in Bengaluru's Humid Climate  -> monsoon-hair-loss-homeopathy-varthur.html
 - 2026-11-08 [Skin] Homeopathic approaches to reducing acne flare-ups triggered by festival smoke and poor air quality in Bengaluru.  -> homeopathy-for-acne-in-varthur.html
 - 2026-11-07 [Skin] Psoriasis and festival smoke: reducing flare-ups during Bengaluru's cool transition.  -> psoriasis-treatment-varthur.html
