@@ -13,6 +13,7 @@ Bengaluru). Keep each post original, locally useful, and tied to a service page.
 
 
 ## Done (most recent first)
+- 2026-11-10 [Allergies] Eye Complaints (Stye & Chalazion): what helps in November  -> eye-allergies-stye-chalazion-varthur.html
 - 2026-11-10 [Allergies] Lung Diseases: what helps in November  -> homeopathy-for-lung-diseases-in-varthur.html
 - 2026-11-10 [Skin] Vitiligo and dry skin: how Bengaluru's northeast monsoon transition affects skin repigmentation and homeopathic care.  -> vitiligo-treatment-varthur.html
 - 2026-11-09 [Skin] Homeopathic Approaches to Managing Cracked Heels and Foot Calluses Exacerbated by Bengaluru's Cool and Dry Transition.  -> homeopathy-for-cracked-heels-varthur.html
