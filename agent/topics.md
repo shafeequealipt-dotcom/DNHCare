@@ -13,6 +13,7 @@ Bengaluru). Keep each post original, locally useful, and tied to a service page.
 
 
 ## Done (most recent first)
+- 2026-11-13 [Migraine] Headache after festival fireworks: is it just noise or something more?  -> migraine-after-festival-fireworks-varthur.html
 - 2026-11-12 [Migraine] Monsoon-Triggered Vertigo and Migraine Connection: A Homeopathic Exploration of Inner Ear Balance and Relief Strategies  -> migraine-vertigo-relief-varthur.html
 - 2026-11-11 [Children] Frequent Cold and Fever in Kids: A Homeopathic Perspective on Identifying and Addressing Underlying Triggers in Bengaluru's Northeast Monsoon Season  -> frequent-cold-in-kids-homeopathy-varthur.html
 - 2026-11-11 [Allergies] Homeopathy for Post-Festival Allergic Coughs in Bengaluru: Causes and Gentle Remedies  -> homeopathy-for-post-festival-allergic-coughs-in-bengaluru.html
