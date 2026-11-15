@@ -13,6 +13,7 @@ Bengaluru). Keep each post original, locally useful, and tied to a service page.
 
 
 ## Done (most recent first)
+- 2026-11-15 [Women] Thyroid and festival weight gain: managing hormonal balance during Bengaluru's cool transition.  -> thyroid-festival-weight-gain-varthur.html
 - 2026-11-15 [Women] Homeopathic Approaches to Managing Monsoon-Exacerbated Vaginal Dryness and Painful Intercourse in Bengaluru's Cool Transition.  -> homeopathy-for-vaginal-dryness-in-varthur.html
 - 2026-11-14 [Women] PCOS and festival-related weight gain: managing cravings and hormonal balance during Bengaluru's cool transition.  -> pcos-weight-gain-varthur.html
 - 2026-11-13 [Migraine] Ringing in the ears after festival fireworks: a homeopathic perspective on relief and prevention in Bengaluru.  -> migraine-relief-varthur.html
