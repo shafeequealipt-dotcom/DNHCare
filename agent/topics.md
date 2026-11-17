@@ -13,6 +13,7 @@ Bengaluru). Keep each post original, locally useful, and tied to a service page.
 
 
 ## Done (most recent first)
+- 2026-11-17 [Allergies] Relieving sinus pressure from poor air quality after Bengaluru's festival season: homeopathic approaches to coping with lingering symptoms.  -> homeopathy-for-sinus-pressure-in-varthur.html
 - 2026-11-17 [Skin] Hyperhidrosis and dry skin: managing excess sweating in Bengaluru's cool transition.  -> hyperhidrosis-treatment-varthur.html
 - 2026-11-16 [Women] Infertility and respiratory allergies: how festival smoke affects conception in Bengaluru's northeast monsoon.  -> infertility-respiratory-allergies-varthur-women.html
 - 2026-11-16 [Women] Fibroids and festival fatigue: homeopathic approaches to managing uterine health during Bengaluru's cool transition.  -> homeopathy-for-fibroids-in-varthur.html
