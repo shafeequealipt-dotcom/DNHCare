@@ -13,6 +13,7 @@ Bengaluru). Keep each post original, locally useful, and tied to a service page.
 
 
 ## Done (most recent first)
+- 2026-11-21 [Children] Homeopathic Approaches to Managing Monsoon-Triggered Reflux in Infants and Toddlers in Bengaluru.  -> homeopathy-for-reflux-in-infants-varthur.html
 - 2026-11-20 [Allergies] How Festival Smoke Affects Asthma Triggers in Bengaluru's Northeast Monsoon Transition  -> asthma-triggers-in-bengaluru-festival-smoke.html
 - 2026-11-20 [Skin] Monsoon-Induced Impacts on Skin's Natural Hydration Barriers: A Homeopathic Perspective on Preventing Dryness and Irritation in Bengaluru's Cool Transition.  -> monsoon-skin-homeopathy-varthur.html
 - 2026-11-19 [Children] Homeopathic Approaches to Soothing Post-Viral Coughs in Kids During Bengaluru's Northeast Monsoon Transition  -> homeopathy-for-post-viral-cough-in-kids.html
