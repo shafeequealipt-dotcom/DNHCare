@@ -13,6 +13,7 @@ Bengaluru). Keep each post original, locally useful, and tied to a service page.
 
 
 ## Done (most recent first)
+- 2026-11-22 [Skin] Homeopathic approaches to soothing monsoon-exacerbated lip eczema and dryness in Bengaluru's cool transition.  -> lip-eczema-homeopathy-varthur.html
 - 2026-11-22 [Allergies] Relieving Sinusitis and Nasal Polyp Symptoms with Homeopathy in Bengaluru's Northeast Monsoon Transition  -> sinusitis-homeopathy-varthur.html
 - 2026-11-21 [Skin] Homeopathic Approaches to Managing Dry Skin Patches on the Hands During Bengaluru's Cool Transition  -> dry-skin-patches-hands-varthur.html
 - 2026-11-21 [Children] Homeopathic Approaches to Managing Monsoon-Triggered Reflux in Infants and Toddlers in Bengaluru.  -> homeopathy-for-reflux-in-infants-varthur.html
