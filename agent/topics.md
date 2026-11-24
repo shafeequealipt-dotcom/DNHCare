@@ -13,6 +13,7 @@ Bengaluru). Keep each post original, locally useful, and tied to a service page.
 
 
 ## Done (most recent first)
+- 2026-11-24 [Allergies] Relieving Sinusitis and Nasal Polyp Symptoms Triggered by Festival Smoke and Poor Air Quality in Bengaluru's Northeast Monsoon Transition with Homeopathy Clinic Near Me Services  -> sinusitis-relief-homeopathy-varthur.html
 - 2026-11-23 [Skin] Dry elbows and knees in Bengaluru's cool transition: homeopathic remedies for smooth skin.  -> dry-elbows-knees-homeopathy-varthur.html
 - 2026-11-23 [Allergies] Asthma and poor air: how homeopathy can help when inhalers aren't enough  -> asthma-treatment-varthur-homeopathy-poor-air-quality.html
 - 2026-11-22 [Children] Homeopathic Approaches to Soothing Monsoon-Triggered Teething Pain in Infants and Toddlers in Bengaluru.  -> homeopathy-for-teething-pain-in-varthur.html
