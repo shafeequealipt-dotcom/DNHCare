@@ -13,6 +13,7 @@ Bengaluru). Keep each post original, locally useful, and tied to a service page.
 
 
 ## Done (most recent first)
+- 2026-11-25 [Allergies] Asthma and poor air: how homeopathy complements inhaler use in Bengaluru's northeast monsoon transition  -> asthma-homeopathy-varthur.html
 - 2026-11-24 [Skin] Homeopathic approaches to managing Bengaluru's monsoon-induced skin darkening and hyperpigmentation.  -> monsoon-skin-darkening-homeopathy-varthur.html
 - 2026-11-24 [Allergies] Relieving Sinusitis and Nasal Polyp Symptoms Triggered by Festival Smoke and Poor Air Quality in Bengaluru's Northeast Monsoon Transition with Homeopathy Clinic Near Me Services  -> sinusitis-relief-homeopathy-varthur.html
 - 2026-11-23 [Skin] Dry elbows and knees in Bengaluru's cool transition: homeopathic remedies for smooth skin.  -> dry-elbows-knees-homeopathy-varthur.html
