@@ -13,6 +13,7 @@ Bengaluru). Keep each post original, locally useful, and tied to a service page.
 
 
 ## Done (most recent first)
+- 2026-11-26 [Skin] Homeopathic Approaches to Managing Dry Skin on the Face During Bengaluru's Cool Transition: Gentle Exfoliation and Moisturizing Techniques.  -> dry-skin-on-face-homeopathy-varthur.html
 - 2026-11-25 [Children] Homeopathic Approaches to Soothing Monsoon-Triggered Croup in Kids: A Guide to Gentle Relief and Prevention in Bengaluru's Cool Transition.  -> homeopathy-for-croup-in-children-varthur.html
 - 2026-11-25 [Allergies] Asthma and poor air: how homeopathy complements inhaler use in Bengaluru's northeast monsoon transition  -> asthma-homeopathy-varthur.html
 - 2026-11-24 [Skin] Homeopathic approaches to managing Bengaluru's monsoon-induced skin darkening and hyperpigmentation.  -> monsoon-skin-darkening-homeopathy-varthur.html
