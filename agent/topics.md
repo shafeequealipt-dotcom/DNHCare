@@ -13,6 +13,7 @@ Bengaluru). Keep each post original, locally useful, and tied to a service page.
 
 
 ## Done (most recent first)
+- 2026-11-26 [Allergies] Can Homeopathy Help When Nasal Sprays Stop Working for Sinusitis and Allergic Cough in Bengaluru's Northeast Monsoon Transition?  -> homeopathy-for-allergies-in-varthur.html
 - 2026-11-26 [Allergies] Managing asthma triggers during Bengaluru's post-monsoon transition to cooler months: a homeopathic perspective on coping with changing air quality.  -> asthma-triggers-homeopathy-varthur.html
 - 2026-11-26 [Children] Homeopathic Approaches to Managing Tonsillitis-Related Sleep Disturbances in Kids During Bengaluru's Northeast Monsoon Transition  -> tonsillitis-sleep-issues-in-kids-varthur.html
 - 2026-11-26 [Skin] Homeopathic Approaches to Managing Dry Skin on the Face During Bengaluru's Cool Transition: Gentle Exfoliation and Moisturizing Techniques.  -> dry-skin-on-face-homeopathy-varthur.html
