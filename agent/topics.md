@@ -13,6 +13,7 @@ Bengaluru). Keep each post original, locally useful, and tied to a service page.
 
 
 ## Done (most recent first)
+- 2026-11-28 [Children] Homeopathic Approaches to Tonsillitis in Kids with Enlarged Adenoids During Bengaluru's Northeast Monsoon Transition  -> homeopathy-for-tonsillitis-in-kids-varthur.html
 - 2026-11-27 [Children] Homeopathic Approaches to Soothing Monsoon-Triggered Coughs in Kids with Sensitive Airways and Recurring Respiratory Issues in Bengaluru.  -> homeopathy-for-kids-cough-in-varthur.html
 - 2026-11-26 [Allergies] Can Homeopathy Help When Nasal Sprays Stop Working for Sinusitis and Allergic Cough in Bengaluru's Northeast Monsoon Transition?  -> homeopathy-for-allergies-in-varthur.html
 - 2026-11-26 [Allergies] Managing asthma triggers during Bengaluru's post-monsoon transition to cooler months: a homeopathic perspective on coping with changing air quality.  -> asthma-triggers-homeopathy-varthur.html
